@@ -65,6 +65,9 @@ You can adjust timer durations, session counts, and UI preferences in the app's 
 
 Contributions are welcome! Please open issues or submit pull requests for improvements or bug fixes.
 
+## 📄 License
+This project is licensed under the [MIT License](./LICENSE).
 ---
+
 
 *Made with ❤️ using the Pomodoro Technique!*
