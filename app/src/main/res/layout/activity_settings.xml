@@ -448,6 +448,38 @@
 
         </LinearLayout>
 
+        <!-- MUSIC TXT -->
+<!--        <TextView-->
+<!--            android:id="@+id/music_txt"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_below="@id/ui_settings_components"-->
+<!--            android:layout_marginStart="22dp"-->
+<!--            android:layout_marginTop="15dp"-->
+<!--            android:fontFamily="@font/montserrat_regular"-->
+<!--            android:text="Music"-->
+<!--            android:textColor="@color/black"-->
+<!--            android:textSize="16sp" />-->
+
+        <!-- MUSIC COMPONENTS -->
+<!--        <LinearLayout-->
+<!--            android:id="@+id/music_components"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_below="@id/music_txt"-->
+<!--            android:layout_marginHorizontal="22dp"-->
+<!--            android:layout_marginTop="5dp"-->
+<!--            android:orientation="vertical">-->
+
+
+
+<!--            &lt;!&ndash; BLANK SPACE &ndash;&gt;-->
+<!--            <RelativeLayout-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="10dp" />-->
+
+<!--        </LinearLayout>-->
+
         <!-- ABOUT THE APP TXT -->
         <TextView
             android:id="@+id/about_the_app_txt"

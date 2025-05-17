@@ -252,7 +252,7 @@ class SettingsActivity : AppCompatActivity() {
         githubCard.setOnClickListener {
             vibrate()
             val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-            intent.data = android.net.Uri.parse("https://www.google.com")
+            intent.data = android.net.Uri.parse("https://github.com/Arijit-05/Minimal-Pomodoro")
             startActivity(intent)
         }
     }
