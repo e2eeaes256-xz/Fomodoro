@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
-    android:scrollbars="none"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#EDEDED"
+    android:scrollbars="none"
     tools:context=".SettingsActivity">
 
     <RelativeLayout
@@ -76,9 +76,9 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:textColor="@color/black"
                             android:fontFamily="@font/montserrat_bold"
                             android:text="Focused Time"
+                            android:textColor="@color/black"
                             android:textSize="18sp" />
 
                         <TextView
@@ -87,9 +87,9 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:textColor="@color/black"
                             android:fontFamily="@font/montserrat_regular"
                             android:text="25 mins"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </RelativeLayout>
@@ -136,10 +136,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
-                            android:textColor="@color/black"
                             android:layout_centerVertical="true"
                             android:fontFamily="@font/montserrat_bold"
                             android:text="Short Break"
+                            android:textColor="@color/black"
                             android:textSize="18sp" />
 
                         <TextView
@@ -148,9 +148,9 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:textColor="@color/black"
                             android:fontFamily="@font/montserrat_regular"
                             android:text="5 mins"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </RelativeLayout>
@@ -198,9 +198,9 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:textColor="@color/black"
                             android:fontFamily="@font/montserrat_bold"
                             android:text="Long Break"
+                            android:textColor="@color/black"
                             android:textSize="18sp" />
 
                         <TextView
@@ -209,9 +209,9 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:textColor="@color/black"
                             android:fontFamily="@font/montserrat_regular"
                             android:text="10 mins"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </RelativeLayout>
@@ -259,9 +259,9 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentStart="true"
                             android:layout_centerVertical="true"
-                            android:textColor="@color/black"
                             android:fontFamily="@font/montserrat_bold"
                             android:text="Sessions"
+                            android:textColor="@color/black"
                             android:textSize="18sp" />
 
                         <TextView
@@ -270,9 +270,9 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentEnd="true"
                             android:layout_centerVertical="true"
-                            android:textColor="@color/black"
                             android:fontFamily="@font/montserrat_regular"
                             android:text="4 sessions"
+                            android:textColor="@color/black"
                             android:textSize="16sp" />
 
                     </RelativeLayout>
@@ -448,37 +448,7 @@
 
         </LinearLayout>
 
-        <!-- MUSIC TXT -->
-<!--        <TextView-->
-<!--            android:id="@+id/music_txt"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_below="@id/ui_settings_components"-->
-<!--            android:layout_marginStart="22dp"-->
-<!--            android:layout_marginTop="15dp"-->
-<!--            android:fontFamily="@font/montserrat_regular"-->
-<!--            android:text="Music"-->
-<!--            android:textColor="@color/black"-->
-<!--            android:textSize="16sp" />-->
-
-        <!-- MUSIC COMPONENTS -->
-<!--        <LinearLayout-->
-<!--            android:id="@+id/music_components"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_below="@id/music_txt"-->
-<!--            android:layout_marginHorizontal="22dp"-->
-<!--            android:layout_marginTop="5dp"-->
-<!--            android:orientation="vertical">-->
-
-
-
-<!--            &lt;!&ndash; BLANK SPACE &ndash;&gt;-->
-<!--            <RelativeLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="10dp" />-->
-
-<!--        </LinearLayout>-->
+        <!-- BACKGROUND MUSIC OPTIONS WILL BE ADDED -->
 
         <!-- ABOUT THE APP TXT -->
         <TextView
@@ -498,17 +468,17 @@
             android:id="@+id/github_card"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:layout_below="@id/about_the_app_txt"
             android:layout_marginHorizontal="22dp"
+            android:layout_marginTop="10dp"
             app:cardCornerRadius="20dp">
 
             <LinearLayout
                 android:id="@+id/github_card_bg"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="horizontal"
                 android:background="@color/white"
+                android:orientation="horizontal"
                 android:padding="10dp">
 
                 <androidx.cardview.widget.CardView
@@ -552,9 +522,9 @@
                         android:id="@+id/ri"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="@color/black"
                         android:fontFamily="@font/montserrat_regular"
                         android:text="Report issues or star the project"
+                        android:textColor="@color/black"
                         android:textSize="13sp" />
 
                 </LinearLayout>
@@ -563,11 +533,24 @@
 
         </androidx.cardview.widget.CardView>
 
+        <!-- MADE WITH LOVE TXT -->
+        <TextView
+            android:id="@+id/made_with_love_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/github_card"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:fontFamily="@font/montserrat_regular"
+            android:text="Made with ❤️ by Arijit"
+            android:textColor="@color/black"
+            android:textSize="13sp" />
+
         <!--BLANK SPACE-->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="10dp"
-            android:layout_below="@id/github_card" />
+            android:layout_below="@id/made_with_love_txt" />
 
     </RelativeLayout>
 

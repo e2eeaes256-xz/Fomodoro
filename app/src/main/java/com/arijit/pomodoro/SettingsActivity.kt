@@ -40,6 +40,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var settingsTxt: TextView
     private lateinit var uiSettingsTxt: TextView
     private lateinit var aboutTheAppTxt: TextView
+    private lateinit var madeWithLoveTxt: TextView
     private lateinit var ft: TextView
     private lateinit var sb: TextView
     private lateinit var lb: TextView
@@ -83,6 +84,7 @@ class SettingsActivity : AppCompatActivity() {
         githubCard = findViewById(R.id.github_card)
         settingsTxt = findViewById(R.id.settings_txt)
         uiSettingsTxt = findViewById(R.id.ui_settings_txt)
+        madeWithLoveTxt = findViewById(R.id.made_with_love_txt)
         aboutTheAppTxt = findViewById(R.id.about_the_app_txt)
         ft = findViewById(R.id.ft)
         sb = findViewById(R.id.sb)
@@ -138,6 +140,7 @@ class SettingsActivity : AppCompatActivity() {
         settingsTxt.setTextColor(resources.getColor(R.color.white))
         uiSettingsTxt.setTextColor(resources.getColor(R.color.white))
         aboutTheAppTxt.setTextColor(resources.getColor(R.color.white))
+        madeWithLoveTxt.setTextColor(resources.getColor(R.color.white))
         backBtn.setImageResource(R.drawable.back_white)
         ft.setTextColor(resources.getColor(R.color.white))
         sb.setTextColor(resources.getColor(R.color.white))
@@ -159,6 +162,7 @@ class SettingsActivity : AppCompatActivity() {
         settingsTxt.setTextColor(resources.getColor(R.color.black))
         uiSettingsTxt.setTextColor(resources.getColor(R.color.black))
         aboutTheAppTxt.setTextColor(resources.getColor(R.color.black))
+        madeWithLoveTxt.setTextColor(resources.getColor(R.color.black))
         backBtn.setImageResource(R.drawable.back_black)
         ft.setTextColor(resources.getColor(R.color.black))
         sb.setTextColor(resources.getColor(R.color.black))
