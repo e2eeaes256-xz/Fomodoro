@@ -1,6 +1,6 @@
-# MinimalPomodoro
+# Fomodoro
 
-MinimalPomodoro is a simple, customizable Pomodoro timer Android app designed to help you focus and manage your work/break sessions efficiently. The app features a clean UI, dark mode, AMOLED mode, and flexible session settings.
+Fomodoro is a simple, customizable Pomodoro timer Android app designed to help you focus and manage your work/break sessions efficiently. The app features a clean UI, dark mode, AMOLED mode, and flexible session settings.
 
 ## Features
 
@@ -44,7 +44,7 @@ MinimalPomodoro is a simple, customizable Pomodoro timer Android app designed to
 
 1. Clone this repository:
     ```sh
-    git clone https://github.com/yourusername/MinimalPomodoro.git
+    https://github.com/Arijit-05/Fomodoro
     ```
 2. Open the project in Android Studio.
 3. Sync Gradle and build the project.
