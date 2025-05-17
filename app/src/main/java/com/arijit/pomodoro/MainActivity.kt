@@ -1,0 +1,123 @@
+package com.arijit.pomodoro
+
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresPermission
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import com.arijit.pomodoro.fragments.TimerFragment
+import android.content.res.Configuration
+import androidx.appcompat.app.AppCompatDelegate
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var settings_btn: ImageView
+    private lateinit var frame_layout: FrameLayout
+    private lateinit var sessionsTxt: TextView
+
+    private val settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            // Reload the timer fragment with new settings
+            showTimerFragment()
+        }
+    }
+
+    private fun setMainBackgroundForFragment(fragmentType: String) {
+        val mainLayout = findViewById<android.widget.RelativeLayout>(R.id.main)
+        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        val darkMode = sharedPreferences.getBoolean("darkMode", false)
+        val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
+
+        if (amoledMode) {
+            mainLayout.setBackgroundColor(resources.getColor(android.R.color.black))
+        } else {
+            when (fragmentType) {
+                "timer" -> mainLayout.setBackgroundResource(if (darkMode) R.color.deep_red else R.color.light_red)
+                "short_break" -> mainLayout.setBackgroundResource(if (darkMode) R.color.deep_green else R.color.light_green)
+                "long_break" -> mainLayout.setBackgroundResource(if (darkMode) R.color.deep_blue else R.color.light_blue)
+            }
+        }
+    }
+
+    private fun showTimerFragment() {
+        setMainBackgroundForFragment("timer")
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.frame_layout, com.arijit.pomodoro.fragments.TimerFragment())
+            .commit()
+    }
+
+    private fun showShortBreakFragment() {
+        setMainBackgroundForFragment("short_break")
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.frame_layout, com.arijit.pomodoro.fragments.ShortBreakFragment())
+            .commit()
+    }
+
+    private fun showLongBreakFragment() {
+        setMainBackgroundForFragment("long_break")
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.frame_layout, com.arijit.pomodoro.fragments.LongBreakFragment())
+            .commit()
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+        sessionsTxt = findViewById(R.id.sessions_txt)
+        settings_btn = findViewById(R.id.settings_btn)
+        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        val darkMode = sharedPreferences.getBoolean("darkMode", false)
+        val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
+
+        if (amoledMode) {
+            settings_btn.setImageResource(R.drawable.setting_dark)
+            sessionsTxt.setTextColor(resources.getColor(R.color.white))
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else if (darkMode) {
+            settings_btn.setImageResource(R.drawable.setting_dark)
+            sessionsTxt.setTextColor(resources.getColor(R.color.white))
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            settings_btn.setImageResource(R.drawable.settings)
+            sessionsTxt.setTextColor(resources.getColor(R.color.black))
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+
+        showTimerFragment()
+
+        settings_btn.setOnClickListener {
+            vibrate()
+            val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+            settingsLauncher.launch(intent)
+        }
+    }
+
+    @RequiresPermission(Manifest.permission.VIBRATE)
+    private fun vibrate() {
+        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (vibrator.hasVibrator()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val vibrationEffect = VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE)
+                vibrator.vibrate(vibrationEffect)
+            } else {
+                vibrator.vibrate(50) // Vibrate for 50 milliseconds
+            }
+        }
+    }
+}
