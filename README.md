@@ -13,15 +13,25 @@ MinimalPomodoro is a simple, customizable Pomodoro timer Android app designed to
 - Easy access to settings and GitHub repository
 
 ## Screenshots
+## Screenshots
 
-![Screenshot_2025-05-17-11-13-11-75_3c1c02f6db8ae4b3584f685951f23a6e](https://github.com/user-attachments/assets/faba92a6-6423-437e-8eff-7968a6b04c17)
-![Screenshot_2025-05-17-11-13-18-87_3c1c02f6db8ae4b3584f685951f23a6e](https://github.com/user-attachments/assets/4f6f8742-100f-4a31-be0a-214560984960)
-![Screenshot_2025-05-17-11-14-07-60_3c1c02f6db8ae4b3584f685951f23a6e](https://github.com/user-attachments/assets/c6691ff3-78ec-4e96-ae03-9e4f35fa7adb)
-![Screenshot_2025-05-17-11-14-00-28_3c1c02f6db8ae4b3584f685951f23a6e](https://github.com/user-attachments/assets/b3bfc1a6-40f0-43a6-ae7c-9ea60ccc1137)
-![Screenshot_2025-05-17-11-13-55-95_3c1c02f6db8ae4b3584f685951f23a6e](https://github.com/user-attachments/assets/5f745880-8f4e-4183-834c-87fb862ea67d)
-![Screenshot_2025-05-17-11-13-49-88_3c1c02f6db8ae4b3584f685951f23a6e](https://github.com/user-attachments/assets/88d0cbe9-3613-40d0-ac0a-45d6e6fbfe76)
-![Screenshot_2025-05-17-11-13-36-87_3c1c02f6db8ae4b3584f685951f23a6e](https://github.com/user-attachments/assets/d7718d8c-bedb-4513-8a08-10209177865f)
-
+<table>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/faba92a6-6423-437e-8eff-7968a6b04c17" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/4f6f8742-100f-4a31-be0a-214560984960" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/c6691ff3-78ec-4e96-ae03-9e4f35fa7adb" width="200"/></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/b3bfc1a6-40f0-43a6-ae7c-9ea60ccc1137" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/5f745880-8f4e-4183-834c-87fb862ea67d" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/88d0cbe9-3613-40d0-ac0a-45d6e6fbfe76" width="200"/></td>
+  </tr>
+  <tr>
+    <td><img src="https://github.com/user-attachments/assets/d7718d8c-bedb-4513-8a08-10209177865f" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/74dc78b6-d2f1-485c-9e17-bf5855ee1b62" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/cba693e6-78b8-40e8-9e92-b5c2c587c82e" width="200"/></td>
+  </tr>
+</table>
 
 ## Getting Started
 
