@@ -1,6 +1,6 @@
-# MinimalPomodoro
+# Fomodoro
 
-MinimalPomodoro is a simple, customizable Pomodoro timer Android app designed to help you focus and manage your work/break sessions efficiently. The app features a clean UI, dark mode, AMOLED mode, and flexible session settings.
+Fomodoro is a simple, customizable Pomodoro timer Android app designed to help you focus and manage your work/break sessions efficiently. The app features a clean UI, dark mode, AMOLED mode, and flexible session settings.
 
 ## Features
 
