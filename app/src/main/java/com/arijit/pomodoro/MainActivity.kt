@@ -26,7 +26,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sessionsTxt: TextView
 
     private val settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
+        if (result.resultCode == SettingsActivity.RESULT_TIMER_SETTINGS_CHANGED) {
+            // Reset session count and reload timer only if timer settings were modified
+            val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+            sharedPreferences.edit().apply {
+                putInt("currentSession", 1)
+                putBoolean("wereTimerSettingsModified", false)
+                apply()
+            }
             // Reload the timer fragment with new settings
             showTimerFragment()
         }
@@ -105,6 +112,28 @@ class MainActivity : AppCompatActivity() {
             vibrate()
             val intent = Intent(this@MainActivity, SettingsActivity::class.java)
             settingsLauncher.launch(intent)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Update theme when returning from settings
+        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        val darkMode = sharedPreferences.getBoolean("darkMode", false)
+        val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
+
+        if (amoledMode) {
+            settings_btn.setImageResource(R.drawable.setting_dark)
+            sessionsTxt.setTextColor(resources.getColor(R.color.white))
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else if (darkMode) {
+            settings_btn.setImageResource(R.drawable.setting_dark)
+            sessionsTxt.setTextColor(resources.getColor(R.color.white))
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            settings_btn.setImageResource(R.drawable.settings)
+            sessionsTxt.setTextColor(resources.getColor(R.color.black))
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
 

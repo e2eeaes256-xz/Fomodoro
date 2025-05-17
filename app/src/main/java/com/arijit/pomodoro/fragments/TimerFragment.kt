@@ -139,6 +139,7 @@ class TimerFragment : Fragment() {
 
             override fun onFinish() {
                 timerRunning = false
+                updateTimerState(false)
                 if (currentSession < totalSessions) {
                     loadShortBreakFragment()
                 } else {
@@ -149,6 +150,7 @@ class TimerFragment : Fragment() {
         }.start()
         
         timerRunning = true
+        updateTimerState(true)
         playBtn.visibility = View.GONE
         pauseBtn.visibility = View.VISIBLE
         resetBtn.visibility = View.VISIBLE
@@ -158,6 +160,7 @@ class TimerFragment : Fragment() {
     private fun pauseTimer() {
         countDownTimer?.cancel()
         timerRunning = false
+        updateTimerState(false)
         playBtn.visibility = View.VISIBLE
         pauseBtn.visibility = View.GONE
     }
@@ -166,6 +169,7 @@ class TimerFragment : Fragment() {
         countDownTimer?.cancel()
         loadSettings()
         timerRunning = false
+        updateTimerState(false)
         updateCountdownText()
         
         playBtn.visibility = View.VISIBLE
@@ -244,6 +248,15 @@ class TimerFragment : Fragment() {
         parentFragmentManager.beginTransaction()
             .replace(R.id.frame_layout, fragment)
             .commit()
+    }
+
+    private fun updateTimerState(isRunning: Boolean) {
+        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        sharedPreferences.edit().apply {
+            putBoolean("isTimerRunning", isRunning)
+            putBoolean("isBreakActive", false)
+            apply()
+        }
     }
 
     companion object {

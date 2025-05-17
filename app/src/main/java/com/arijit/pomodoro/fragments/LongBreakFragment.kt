@@ -161,12 +161,14 @@ class LongBreakFragment : Fragment() {
 
             override fun onFinish() {
                 timerRunning = false
+                updateBreakState(false)
                 Toast.makeText(requireContext(), "Break completed", Toast.LENGTH_SHORT).show()
                 loadTimerFragment()
             }
         }.start()
         
         timerRunning = true
+        updateBreakState(true)
         playBtn.visibility = View.GONE
         pauseBtn.visibility = View.VISIBLE
         resetBtn.visibility = View.VISIBLE
@@ -176,6 +178,7 @@ class LongBreakFragment : Fragment() {
     private fun pauseTimer() {
         countDownTimer?.cancel()
         timerRunning = false
+        updateBreakState(false)
         playBtn.visibility = View.VISIBLE
         pauseBtn.visibility = View.GONE
     }
@@ -184,6 +187,7 @@ class LongBreakFragment : Fragment() {
         countDownTimer?.cancel()
         loadSettings()
         timerRunning = false
+        updateBreakState(false)
         updateCountdownText()
         
         playBtn.visibility = View.VISIBLE
@@ -202,6 +206,15 @@ class LongBreakFragment : Fragment() {
 
     private fun updateSessionsText() {
         sessionsTxt.text = "$currentSession/$totalSessions"
+    }
+
+    private fun updateBreakState(isActive: Boolean) {
+        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        sharedPreferences.edit().apply {
+            putBoolean("isTimerRunning", false)
+            putBoolean("isBreakActive", isActive)
+            apply()
+        }
     }
 
     @RequiresPermission(Manifest.permission.VIBRATE)

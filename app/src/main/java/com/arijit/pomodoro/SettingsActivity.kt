@@ -7,6 +7,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
@@ -40,6 +41,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var settingsTxt: TextView
     private lateinit var uiSettingsTxt: TextView
     private lateinit var aboutTheAppTxt: TextView
+    private lateinit var runningTimerTxt: TextView
     private lateinit var madeWithLoveTxt: TextView
     private lateinit var ft: TextView
     private lateinit var sb: TextView
@@ -50,6 +52,12 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var am: TextView
     private lateinit var gr: TextView
     private lateinit var ri: TextView
+    private lateinit var uiSettingsComponents: LinearLayout
+    private lateinit var timerSettingsComponents: LinearLayout
+
+    companion object {
+        const val RESULT_TIMER_SETTINGS_CHANGED = 100
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,6 +74,24 @@ class SettingsActivity : AppCompatActivity() {
         loadSavedSettings()
         setupListeners()
         applyTheme()
+        checkTimerState()
+    }
+
+    private fun checkTimerState() {
+        val isTimerRunning = sharedPreferences.getBoolean("isTimerRunning", false)
+        val isBreakActive = sharedPreferences.getBoolean("isBreakActive", false)
+        
+        if (isTimerRunning || isBreakActive) {
+            timerSettingsComponents.visibility = View.GONE
+            uiSettingsTxt.visibility = View.GONE
+            uiSettingsComponents.visibility = View.GONE
+            runningTimerTxt.visibility = View.VISIBLE
+        } else {
+            timerSettingsComponents.visibility = View.VISIBLE
+            uiSettingsTxt.visibility = View.VISIBLE
+            uiSettingsComponents.visibility = View.VISIBLE
+            runningTimerTxt.visibility = View.GONE
+        }
     }
 
     private fun initializeViews() {
@@ -84,6 +110,7 @@ class SettingsActivity : AppCompatActivity() {
         githubCard = findViewById(R.id.github_card)
         settingsTxt = findViewById(R.id.settings_txt)
         uiSettingsTxt = findViewById(R.id.ui_settings_txt)
+        runningTimerTxt = findViewById(R.id.running_timer_txt)
         madeWithLoveTxt = findViewById(R.id.made_with_love_txt)
         aboutTheAppTxt = findViewById(R.id.about_the_app_txt)
         ft = findViewById(R.id.ft)
@@ -95,6 +122,8 @@ class SettingsActivity : AppCompatActivity() {
         am = findViewById(R.id.am)
         gr = findViewById(R.id.gr)
         ri = findViewById(R.id.ri)
+        uiSettingsComponents = findViewById(R.id.ui_settings_components)
+        timerSettingsComponents = findViewById(R.id.timer_settings_components)
     }
 
     private fun loadSavedSettings() {
@@ -140,6 +169,7 @@ class SettingsActivity : AppCompatActivity() {
         settingsTxt.setTextColor(resources.getColor(R.color.white))
         uiSettingsTxt.setTextColor(resources.getColor(R.color.white))
         aboutTheAppTxt.setTextColor(resources.getColor(R.color.white))
+        runningTimerTxt.setTextColor(resources.getColor(R.color.white))
         madeWithLoveTxt.setTextColor(resources.getColor(R.color.white))
         backBtn.setImageResource(R.drawable.back_white)
         ft.setTextColor(resources.getColor(R.color.white))
@@ -162,6 +192,7 @@ class SettingsActivity : AppCompatActivity() {
         settingsTxt.setTextColor(resources.getColor(R.color.black))
         uiSettingsTxt.setTextColor(resources.getColor(R.color.black))
         aboutTheAppTxt.setTextColor(resources.getColor(R.color.black))
+        runningTimerTxt.setTextColor(resources.getColor(R.color.black))
         madeWithLoveTxt.setTextColor(resources.getColor(R.color.black))
         backBtn.setImageResource(R.drawable.back_black)
         ft.setTextColor(resources.getColor(R.color.black))
@@ -214,26 +245,36 @@ class SettingsActivity : AppCompatActivity() {
     private fun setupListeners() {
         backBtn.setOnClickListener {
             saveSettings()
-            setResult(RESULT_OK)
+            if (sharedPreferences.getBoolean("wereTimerSettingsModified", false)) {
+                setResult(RESULT_TIMER_SETTINGS_CHANGED)
+            }
             finish()
             vibrate()
         }
 
         focusedTimeSlider.addOnChangeListener { _, value, _ ->
             focusedTimeTxt.text = "${value.toInt()} mins"
+            markTimerSettingsModified()
         }
 
         shortBreakSlider.addOnChangeListener { _, value, _ ->
             shortBreakTxt.text = "${value.toInt()} mins"
+            markTimerSettingsModified()
         }
 
         longBreakSlider.addOnChangeListener { _, value, _ ->
             longBreakTxt.text = "${value.toInt()} mins"
+            markTimerSettingsModified()
         }
 
         sessionsSlider.addOnChangeListener { _, value, _ ->
             val sessions = value.toInt()
             sessionsTxt.text = "$sessions sessions"
+            markTimerSettingsModified()
+        }
+
+        autoStartSessions.setOnCheckedChangeListener { _, _ ->
+            markTimerSettingsModified()
         }
 
         darkModeToggle.setOnCheckedChangeListener { _, isChecked ->
@@ -244,13 +285,11 @@ class SettingsActivity : AppCompatActivity() {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
             applyTheme()
-            setResult(RESULT_OK)
         }
 
         amoledToggle.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit().putBoolean("amoledMode", isChecked).apply()
             applyTheme()
-            setResult(RESULT_OK)
         }
 
         githubCard.setOnClickListener {
@@ -259,6 +298,10 @@ class SettingsActivity : AppCompatActivity() {
             intent.data = android.net.Uri.parse("https://github.com/Arijit-05/Minimal-Pomodoro")
             startActivity(intent)
         }
+    }
+
+    private fun markTimerSettingsModified() {
+        sharedPreferences.edit().putBoolean("wereTimerSettingsModified", true).apply()
     }
 
     private fun updateTexts() {

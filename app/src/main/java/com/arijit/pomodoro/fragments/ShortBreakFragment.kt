@@ -169,6 +169,7 @@ class ShortBreakFragment : Fragment() {
 
             override fun onFinish() {
                 timerRunning = false
+                updateBreakState(false)
                 if (currentSession < totalSessions) {
                     loadTimerFragment()
                 } else {
@@ -179,6 +180,7 @@ class ShortBreakFragment : Fragment() {
         }.start()
         
         timerRunning = true
+        updateBreakState(true)
         playBtn.visibility = View.GONE
         pauseBtn.visibility = View.VISIBLE
         resetBtn.visibility = View.VISIBLE
@@ -188,6 +190,7 @@ class ShortBreakFragment : Fragment() {
     private fun pauseTimer() {
         countDownTimer?.cancel()
         timerRunning = false
+        updateBreakState(false)
         playBtn.visibility = View.VISIBLE
         pauseBtn.visibility = View.GONE
     }
@@ -196,6 +199,7 @@ class ShortBreakFragment : Fragment() {
         countDownTimer?.cancel()
         loadSettings()
         timerRunning = false
+        updateBreakState(false)
         updateCountdownText()
         
         playBtn.visibility = View.VISIBLE
@@ -260,5 +264,14 @@ class ShortBreakFragment : Fragment() {
         this.totalSessions = totalSessions
         this.autoStart = autoStart
         this.isFromTimer = isFromTimer
+    }
+
+    private fun updateBreakState(isActive: Boolean) {
+        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        sharedPreferences.edit().apply {
+            putBoolean("isTimerRunning", false)
+            putBoolean("isBreakActive", isActive)
+            apply()
+        }
     }
 }
