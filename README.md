@@ -13,7 +13,6 @@ Fomodoro is a simple, customizable Pomodoro timer Android app designed to help y
 - Easy access to settings and GitHub repository
 
 ## Screenshots
-## Screenshots
 
 <table>
   <tr>
