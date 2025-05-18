@@ -295,7 +295,68 @@
                             app:thumbColor="#782323"
                             app:tickVisible="false"
                             app:trackColorActive="@color/medium_red"
-                            app:trackColorInactive="#FFCFCF" />
+                            app:trackColorInactive="@color/slider_light" />
+
+                    </LinearLayout>
+
+                </androidx.cardview.widget.CardView>
+
+                <!-- ALARM CARD -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/alarm_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    app:cardCornerRadius="20dp">
+
+                    <LinearLayout
+                        android:id="@+id/alarm_card_bg"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@color/white"
+                        android:orientation="vertical"
+                        android:padding="15dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/a"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentStart="true"
+                                android:layout_centerVertical="true"
+                                android:fontFamily="@font/montserrat_bold"
+                                android:text="Alarm"
+                                android:textColor="@color/black"
+                                android:textSize="18sp" />
+
+                            <TextView
+                                android:id="@+id/alarm_txt"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:layout_centerVertical="true"
+                                android:fontFamily="@font/montserrat_regular"
+                                android:text="3 seconds"
+                                android:textColor="@color/black"
+                                android:textSize="16sp" />
+
+                        </RelativeLayout>
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/slider_alarm"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:stepSize="1"
+                            android:value="3"
+                            android:valueFrom="1"
+                            android:valueTo="5"
+                            app:thumbColor="#782323"
+                            app:tickVisible="false"
+                            app:trackColorActive="@color/medium_red"
+                            app:trackColorInactive="@color/slider_light" />
 
                     </LinearLayout>
 

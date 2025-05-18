@@ -2,6 +2,7 @@ package com.arijit.pomodoro.fragments
 
 import android.Manifest
 import android.content.Context
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -20,6 +21,8 @@ import androidx.annotation.RequiresPermission
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import com.arijit.pomodoro.R
+import android.app.NotificationManager
+import androidx.core.app.NotificationCompat
 
 class LongBreakFragment : Fragment() {
     private lateinit var backToTimer: TextView
@@ -33,6 +36,7 @@ class LongBreakFragment : Fragment() {
     private lateinit var longBreakCardBg: LinearLayout
     private lateinit var longBreakTxt: TextView
     private lateinit var sessionsTxt: TextView
+    private var mediaPlayer: MediaPlayer? = null
     
     private var countDownTimer: CountDownTimer? = null
     private var timeLeftInMillis: Long = 0
@@ -162,6 +166,7 @@ class LongBreakFragment : Fragment() {
             override fun onFinish() {
                 timerRunning = false
                 updateBreakState(false)
+                playAlarm()
                 Toast.makeText(requireContext(), "Break completed", Toast.LENGTH_SHORT).show()
                 loadTimerFragment()
             }
@@ -230,9 +235,47 @@ class LongBreakFragment : Fragment() {
         }
     }
     
+    private fun playAlarm() {
+        try {
+            val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+            val alarmDuration = sharedPreferences.getInt("alarmDuration", 3) * 1000L // Convert to milliseconds
+
+            // Show notification
+            val notificationManager = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val builder = NotificationCompat.Builder(requireContext(), "timer_notifications")
+                .setSmallIcon(R.drawable.coffee)
+                .setContentTitle("Long Break Complete")
+                .setContentText("Rest or reset?")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+
+            notificationManager.notify(3, builder.build())
+
+            // Vibrate
+            val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val vibrationEffect = VibrationEffect.createWaveform(longArrayOf(0, 500, 500), 0)
+                    vibrator.vibrate(vibrationEffect)
+                } else {
+                    vibrator.vibrate(longArrayOf(0, 500, 500), 0)
+                }
+            }
+
+            // Stop after configured duration
+            android.os.Handler().postDelayed({
+                vibrator.cancel()
+            }, alarmDuration)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         countDownTimer?.cancel()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
     fun setSessionInfo(currentSession: Int, totalSessions: Int) {

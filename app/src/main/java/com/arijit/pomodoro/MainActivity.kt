@@ -19,6 +19,15 @@ import androidx.core.view.WindowInsetsCompat
 import com.arijit.pomodoro.fragments.TimerFragment
 import android.content.res.Configuration
 import androidx.appcompat.app.AppCompatDelegate
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 
 class MainActivity : AppCompatActivity() {
     private lateinit var settings_btn: ImageView
@@ -36,6 +45,66 @@ class MainActivity : AppCompatActivity() {
             }
             // Reload the timer fragment with new settings
             showTimerFragment()
+        }
+    }
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            createNotificationChannel()
+        } else {
+            // If permission is denied, show settings dialog
+            AlertDialog.Builder(this)
+                .setTitle("Notification Permission Required")
+                .setMessage("This app needs notification permission to alert you when timers complete. Please enable it in Settings.")
+                .setPositiveButton("Open Settings") { _, _ ->
+                    // Open app settings
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.fromParts("package", packageName, null)
+                    }
+                    startActivity(intent)
+                }
+                .setNegativeButton("Not Now") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        }
+    }
+
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    // Permission is granted, create notification channel
+                    createNotificationChannel()
+                }
+                else -> {
+                    // Request the permission directly
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        } else {
+            // For Android versions below 13, create notification channel directly
+            createNotificationChannel()
+        }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "timer_notifications",
+                "Timer Notifications",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Notifications for timer completion"
+                enableVibration(true)
+            }
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
         }
     }
 
@@ -86,6 +155,10 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        // Check and request notification permission
+        checkNotificationPermission()
+
         sessionsTxt = findViewById(R.id.sessions_txt)
         settings_btn = findViewById(R.id.settings_btn)
         val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)

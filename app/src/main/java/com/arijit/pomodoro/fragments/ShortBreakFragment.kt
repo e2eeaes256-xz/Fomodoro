@@ -2,6 +2,7 @@ package com.arijit.pomodoro.fragments
 
 import android.Manifest
 import android.content.Context
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -20,6 +21,8 @@ import androidx.annotation.RequiresPermission
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import com.arijit.pomodoro.R
+import android.app.NotificationManager
+import androidx.core.app.NotificationCompat
 
 class ShortBreakFragment : Fragment() {
     private lateinit var backToTimer: TextView
@@ -33,6 +36,7 @@ class ShortBreakFragment : Fragment() {
     private lateinit var shortBreakCardBg: LinearLayout
     private lateinit var shortBreakTxt: TextView
     private lateinit var sessionsTxt: TextView
+    private var mediaPlayer: MediaPlayer? = null
     
     private var countDownTimer: CountDownTimer? = null
     private var timeLeftInMillis: Long = 0
@@ -170,6 +174,7 @@ class ShortBreakFragment : Fragment() {
             override fun onFinish() {
                 timerRunning = false
                 updateBreakState(false)
+                playAlarm()
                 if (currentSession < totalSessions) {
                     loadTimerFragment()
                 } else {
@@ -257,6 +262,8 @@ class ShortBreakFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         countDownTimer?.cancel()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
     fun setSessionInfo(currentSession: Int, totalSessions: Int, autoStart: Boolean, isFromTimer: Boolean = false) {
@@ -272,6 +279,42 @@ class ShortBreakFragment : Fragment() {
             putBoolean("isTimerRunning", false)
             putBoolean("isBreakActive", isActive)
             apply()
+        }
+    }
+
+    private fun playAlarm() {
+        try {
+            val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+            val alarmDuration = sharedPreferences.getInt("alarmDuration", 3) * 1000L // Convert to milliseconds
+
+            // Show notification
+            val notificationManager = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            val builder = NotificationCompat.Builder(requireContext(), "timer_notifications")
+                .setSmallIcon(R.drawable.coffee)
+                .setContentTitle("Break Time Over")
+                .setContentText("Break time is over. Back to work!")
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true)
+
+            notificationManager.notify(2, builder.build())
+
+            // Vibrate
+            val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (vibrator.hasVibrator()) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val vibrationEffect = VibrationEffect.createWaveform(longArrayOf(0, 500, 500), 0)
+                    vibrator.vibrate(vibrationEffect)
+                } else {
+                    vibrator.vibrate(longArrayOf(0, 500, 500), 0)
+                }
+            }
+
+            // Stop after configured duration
+            android.os.Handler().postDelayed({
+                vibrator.cancel()
+            }, alarmDuration)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 }

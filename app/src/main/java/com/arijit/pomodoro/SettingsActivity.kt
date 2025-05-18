@@ -20,8 +20,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.slider.Slider
-import com.arijit.pomodoro.fragments.TimerFragment
-import org.w3c.dom.Text
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var backBtn: ImageView
@@ -33,6 +31,8 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var longBreakSlider: Slider
     private lateinit var sessionsTxt: TextView
     private lateinit var sessionsSlider: Slider
+    private lateinit var alarmTxt: TextView
+    private lateinit var alarmSlider: Slider
     private lateinit var autoStartSessions: MaterialSwitch
     private lateinit var darkModeToggle: MaterialSwitch
     private lateinit var amoledToggle: MaterialSwitch
@@ -52,6 +52,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var am: TextView
     private lateinit var gr: TextView
     private lateinit var ri: TextView
+    private lateinit var a: TextView
     private lateinit var uiSettingsComponents: LinearLayout
     private lateinit var timerSettingsComponents: LinearLayout
 
@@ -109,6 +110,8 @@ class SettingsActivity : AppCompatActivity() {
         amoledToggle = findViewById(R.id.amoled_toggle)
         githubCard = findViewById(R.id.github_card)
         settingsTxt = findViewById(R.id.settings_txt)
+        alarmTxt = findViewById(R.id.alarm_txt)
+        alarmSlider = findViewById(R.id.slider_alarm)
         uiSettingsTxt = findViewById(R.id.ui_settings_txt)
         runningTimerTxt = findViewById(R.id.running_timer_txt)
         madeWithLoveTxt = findViewById(R.id.made_with_love_txt)
@@ -122,6 +125,7 @@ class SettingsActivity : AppCompatActivity() {
         am = findViewById(R.id.am)
         gr = findViewById(R.id.gr)
         ri = findViewById(R.id.ri)
+        a = findViewById(R.id.a)
         uiSettingsComponents = findViewById(R.id.ui_settings_components)
         timerSettingsComponents = findViewById(R.id.timer_settings_components)
     }
@@ -131,6 +135,7 @@ class SettingsActivity : AppCompatActivity() {
         shortBreakSlider.value = sharedPreferences.getInt("shortBreak", 5).toFloat()
         longBreakSlider.value = sharedPreferences.getInt("longBreak", 10).toFloat()
         sessionsSlider.value = sharedPreferences.getInt("sessions", 4).toFloat()
+        alarmSlider.value = sharedPreferences.getInt("alarmDuration", 3).toFloat()
         autoStartSessions.isChecked = sharedPreferences.getBoolean("autoStart", false)
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
         darkModeToggle.isChecked = darkMode
@@ -149,14 +154,17 @@ class SettingsActivity : AppCompatActivity() {
             mainLayout.setBackgroundColor(resources.getColor(android.R.color.black))
             applyDarkModeTextColors()
             applyDarkModeCardBackgrounds()
+            applyDarkModeSliderColors()
         } else if (darkMode) {
             mainLayout.setBackgroundColor(resources.getColor(R.color.dark_background))
             applyDarkModeTextColors()
             applyDarkModeCardBackgrounds()
+            applyDarkModeSliderColors()
         } else {
             mainLayout.setBackgroundColor(resources.getColor(R.color.offwhite))
             applyLightModeTextColors()
             applyLightModeCardBackgrounds()
+            applyLightModeSliderColors()
         }
     }
 
@@ -166,6 +174,7 @@ class SettingsActivity : AppCompatActivity() {
         shortBreakTxt.setTextColor(resources.getColor(R.color.white))
         longBreakTxt.setTextColor(resources.getColor(R.color.white))
         sessionsTxt.setTextColor(resources.getColor(R.color.white))
+        alarmTxt.setTextColor(resources.getColor(R.color.white))
         settingsTxt.setTextColor(resources.getColor(R.color.white))
         uiSettingsTxt.setTextColor(resources.getColor(R.color.white))
         aboutTheAppTxt.setTextColor(resources.getColor(R.color.white))
@@ -181,6 +190,7 @@ class SettingsActivity : AppCompatActivity() {
         am.setTextColor(resources.getColor(R.color.white))
         gr.setTextColor(resources.getColor(R.color.white))
         ri.setTextColor(resources.getColor(R.color.white))
+        a.setTextColor(resources.getColor(R.color.white))
     }
 
     private fun applyLightModeTextColors() {
@@ -191,6 +201,7 @@ class SettingsActivity : AppCompatActivity() {
         sessionsTxt.setTextColor(resources.getColor(R.color.black))
         settingsTxt.setTextColor(resources.getColor(R.color.black))
         uiSettingsTxt.setTextColor(resources.getColor(R.color.black))
+        alarmTxt.setTextColor(resources.getColor(R.color.black))
         aboutTheAppTxt.setTextColor(resources.getColor(R.color.black))
         runningTimerTxt.setTextColor(resources.getColor(R.color.black))
         madeWithLoveTxt.setTextColor(resources.getColor(R.color.black))
@@ -204,6 +215,7 @@ class SettingsActivity : AppCompatActivity() {
         am.setTextColor(resources.getColor(R.color.black))
         gr.setTextColor(resources.getColor(R.color.black))
         ri.setTextColor(resources.getColor(R.color.black))
+        a.setTextColor(resources.getColor(R.color.black))
     }
 
     private fun applyDarkModeCardBackgrounds() {
@@ -213,6 +225,7 @@ class SettingsActivity : AppCompatActivity() {
             findViewById<LinearLayout>(R.id.short_break_card_bg),
             findViewById<LinearLayout>(R.id.long_break_card_bg),
             findViewById<LinearLayout>(R.id.sessions_card_bg),
+            findViewById<LinearLayout>(R.id.alarm_card_bg),
             findViewById<RelativeLayout>(R.id.auto_start_sessions_card_bg),
             findViewById<RelativeLayout>(R.id.dark_mode_card_bg),
             findViewById<RelativeLayout>(R.id.amoled_card_bg),
@@ -231,6 +244,7 @@ class SettingsActivity : AppCompatActivity() {
             findViewById<LinearLayout>(R.id.short_break_card_bg),
             findViewById<LinearLayout>(R.id.long_break_card_bg),
             findViewById<LinearLayout>(R.id.sessions_card_bg),
+            findViewById<LinearLayout>(R.id.alarm_card_bg),
             findViewById<RelativeLayout>(R.id.auto_start_sessions_card_bg),
             findViewById<RelativeLayout>(R.id.dark_mode_card_bg),
             findViewById<RelativeLayout>(R.id.amoled_card_bg),
@@ -239,6 +253,62 @@ class SettingsActivity : AppCompatActivity() {
 
         cardBackgrounds.forEach { card ->
             card.setBackgroundColor(resources.getColor(R.color.white))
+        }
+    }
+
+    private fun applyDarkModeSliderColors() {
+        focusedTimeSlider.apply {
+            setTrackActiveTintList(resources.getColorStateList(R.color.slider_light))
+            setTrackInactiveTintList(resources.getColorStateList(R.color.medium_red))
+            setThumbTintList(resources.getColorStateList(R.color.light_red))
+        }
+        shortBreakSlider.apply {
+            setTrackActiveTintList(resources.getColorStateList(R.color.slider_light))
+            setTrackInactiveTintList(resources.getColorStateList(R.color.medium_red))
+            setThumbTintList(resources.getColorStateList(R.color.light_red))
+        }
+        longBreakSlider.apply {
+            setTrackActiveTintList(resources.getColorStateList(R.color.slider_light))
+            setTrackInactiveTintList(resources.getColorStateList(R.color.medium_red))
+            setThumbTintList(resources.getColorStateList(R.color.light_red))
+        }
+        sessionsSlider.apply {
+            setTrackActiveTintList(resources.getColorStateList(R.color.slider_light))
+            setTrackInactiveTintList(resources.getColorStateList(R.color.medium_red))
+            setThumbTintList(resources.getColorStateList(R.color.light_red))
+        }
+        alarmSlider.apply {
+            setTrackActiveTintList(resources.getColorStateList(R.color.slider_light))
+            setTrackInactiveTintList(resources.getColorStateList(R.color.medium_red))
+            setThumbTintList(resources.getColorStateList(R.color.light_red))
+        }
+    }
+
+    private fun applyLightModeSliderColors() {
+        focusedTimeSlider.apply {
+            setTrackActiveTintList(resources.getColorStateList(R.color.medium_red))
+            setTrackInactiveTintList(resources.getColorStateList(R.color.slider_light))
+            setThumbTintList(resources.getColorStateList(R.color.medium_red))
+        }
+        shortBreakSlider.apply {
+            setTrackActiveTintList(resources.getColorStateList(R.color.medium_red))
+            setTrackInactiveTintList(resources.getColorStateList(R.color.slider_light))
+            setThumbTintList(resources.getColorStateList(R.color.medium_red))
+        }
+        longBreakSlider.apply {
+            setTrackActiveTintList(resources.getColorStateList(R.color.medium_red))
+            setTrackInactiveTintList(resources.getColorStateList(R.color.slider_light))
+            setThumbTintList(resources.getColorStateList(R.color.medium_red))
+        }
+        sessionsSlider.apply {
+            setTrackActiveTintList(resources.getColorStateList(R.color.medium_red))
+            setTrackInactiveTintList(resources.getColorStateList(R.color.slider_light))
+            setThumbTintList(resources.getColorStateList(R.color.medium_red))
+        }
+        alarmSlider.apply {
+            setTrackActiveTintList(resources.getColorStateList(R.color.medium_red))
+            setTrackInactiveTintList(resources.getColorStateList(R.color.slider_light))
+            setThumbTintList(resources.getColorStateList(R.color.medium_red))
         }
     }
 
@@ -270,6 +340,11 @@ class SettingsActivity : AppCompatActivity() {
         sessionsSlider.addOnChangeListener { _, value, _ ->
             val sessions = value.toInt()
             sessionsTxt.text = "$sessions sessions"
+            markTimerSettingsModified()
+        }
+
+        alarmSlider.addOnChangeListener { _, value, _ ->
+            alarmTxt.text = "${value.toInt()} seconds"
             markTimerSettingsModified()
         }
 
@@ -318,6 +393,7 @@ class SettingsActivity : AppCompatActivity() {
             putInt("shortBreak", shortBreakSlider.value.toInt())
             putInt("longBreak", longBreakSlider.value.toInt())
             putInt("sessions", sessionsSlider.value.toInt())
+            putInt("alarmDuration", alarmSlider.value.toInt())
             putBoolean("autoStart", autoStartSessions.isChecked)
             apply()
         }
