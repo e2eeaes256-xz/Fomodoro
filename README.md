@@ -1,4 +1,4 @@
-# Fomodoro
+# Fomodoro [![IzzyOnDroid](https://img.shields.io/badge/IzzyOnDroid-Fomodoro-brightgreen)](https://apt.izzysoft.de/packages/com.arijit.pomodoro)
 
 Fomodoro is a simple, customizable Pomodoro timer Android app designed to help you focus and manage your work/break sessions efficiently. The app features a clean UI, dark mode, AMOLED mode, and flexible session settings.
 
