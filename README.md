@@ -28,7 +28,7 @@ Fomodoro is a simple, customizable Pomodoro timer Android app designed to help y
   <tr>
     <td><img src="https://github.com/user-attachments/assets/d7718d8c-bedb-4513-8a08-10209177865f" width="200"/></td>
     <td><img src="https://github.com/user-attachments/assets/74dc78b6-d2f1-485c-9e17-bf5855ee1b62" width="200"/></td>
-    <td><img src="https://github.com/user-attachments/assets/cba693e6-78b8-40e8-9e92-b5c2c587c82e" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/b2b2502f-9f38-4088-95aa-81f950c54698" width="200"/></td>
   </tr>
 </table>
 
