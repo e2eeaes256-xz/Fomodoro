@@ -74,33 +74,10 @@ class TimerFragment : Fragment() {
 
         val parentLayout = requireActivity().findViewById<android.widget.RelativeLayout>(R.id.main)
         val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
-        val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
 
         if (amoledMode) {
-            minTxt.setTextColor(resources.getColor(R.color.light_red))
-            secTxt.setTextColor(resources.getColor(R.color.light_red))
-            focusTxt.setTextColor(resources.getColor(R.color.deep_red))
-            focusCardBg.setBackgroundColor(resources.getColor(R.color.medium_red))
-            skipBtn.setImageResource(R.drawable.skip_red_dark)
-            resetBtn.setImageResource(R.drawable.reset_red_dark)
-            brain.setImageResource(R.drawable.brain_dark_red)
-        } else if (darkMode) {
-            minTxt.setTextColor(resources.getColor(R.color.light_red))
-            secTxt.setTextColor(resources.getColor(R.color.light_red))
-            focusTxt.setTextColor(resources.getColor(R.color.deep_red))
-            focusCardBg.setBackgroundColor(resources.getColor(R.color.medium_red))
-            skipBtn.setImageResource(R.drawable.skip_red_dark)
-            resetBtn.setImageResource(R.drawable.reset_red_dark)
-            brain.setImageResource(R.drawable.brain_dark_red)
-        } else {
-            minTxt.setTextColor(resources.getColor(R.color.deep_red))
-            secTxt.setTextColor(resources.getColor(R.color.deep_red))
-            focusTxt.setTextColor(resources.getColor(R.color.light_red))
-            focusCardBg.setBackgroundColor(resources.getColor(R.color.deep_red))
-            skipBtn.setImageResource(R.drawable.skip_red)
-            resetBtn.setImageResource(R.drawable.reset_red)
-            brain.setImageResource(R.drawable.brain)
+            parentLayout.setBackgroundColor(resources.getColor(android.R.color.black))
         }
 
         updateCountdownText()

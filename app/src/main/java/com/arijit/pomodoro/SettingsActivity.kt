@@ -20,6 +20,8 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.slider.Slider
+import android.content.res.Configuration
+import androidx.activity.result.contract.ActivityResultContracts
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var backBtn: ImageView
@@ -38,21 +40,12 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var amoledToggle: MaterialSwitch
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var githubCard: androidx.cardview.widget.CardView
+    private lateinit var supportCard: androidx.cardview.widget.CardView
     private lateinit var settingsTxt: TextView
     private lateinit var uiSettingsTxt: TextView
     private lateinit var aboutTheAppTxt: TextView
     private lateinit var runningTimerTxt: TextView
     private lateinit var madeWithLoveTxt: TextView
-    private lateinit var ft: TextView
-    private lateinit var sb: TextView
-    private lateinit var lb: TextView
-    private lateinit var s: TextView
-    private lateinit var ass: TextView
-    private lateinit var dm: TextView
-    private lateinit var am: TextView
-    private lateinit var gr: TextView
-    private lateinit var ri: TextView
-    private lateinit var a: TextView
     private lateinit var uiSettingsComponents: LinearLayout
     private lateinit var timerSettingsComponents: LinearLayout
 
@@ -78,10 +71,21 @@ class SettingsActivity : AppCompatActivity() {
         checkTimerState()
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if (amoledToggle.isChecked) {
+            val isNightMode = newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+            darkModeToggle.isChecked = isNightMode
+            sharedPreferences.edit().putBoolean("darkMode", isNightMode).apply()
+            AppCompatDelegate.setDefaultNightMode(if (isNightMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
+            applyTheme()
+        }
+    }
+
     private fun checkTimerState() {
         val isTimerRunning = sharedPreferences.getBoolean("isTimerRunning", false)
         val isBreakActive = sharedPreferences.getBoolean("isBreakActive", false)
-        
+
         if (isTimerRunning || isBreakActive) {
             timerSettingsComponents.visibility = View.GONE
             uiSettingsTxt.visibility = View.GONE
@@ -109,6 +113,7 @@ class SettingsActivity : AppCompatActivity() {
         darkModeToggle = findViewById(R.id.dark_mode_toggle)
         amoledToggle = findViewById(R.id.amoled_toggle)
         githubCard = findViewById(R.id.github_card)
+        supportCard = findViewById(R.id.support_card)
         settingsTxt = findViewById(R.id.settings_txt)
         alarmTxt = findViewById(R.id.alarm_txt)
         alarmSlider = findViewById(R.id.slider_alarm)
@@ -116,16 +121,6 @@ class SettingsActivity : AppCompatActivity() {
         runningTimerTxt = findViewById(R.id.running_timer_txt)
         madeWithLoveTxt = findViewById(R.id.made_with_love_txt)
         aboutTheAppTxt = findViewById(R.id.about_the_app_txt)
-        ft = findViewById(R.id.ft)
-        sb = findViewById(R.id.sb)
-        lb = findViewById(R.id.lb)
-        s = findViewById(R.id.s)
-        ass = findViewById(R.id.ass)
-        dm = findViewById(R.id.dm)
-        am = findViewById(R.id.am)
-        gr = findViewById(R.id.gr)
-        ri = findViewById(R.id.ri)
-        a = findViewById(R.id.a)
         uiSettingsComponents = findViewById(R.id.ui_settings_components)
         timerSettingsComponents = findViewById(R.id.timer_settings_components)
     }
@@ -152,163 +147,10 @@ class SettingsActivity : AppCompatActivity() {
 
         if (amoledMode) {
             mainLayout.setBackgroundColor(resources.getColor(android.R.color.black))
-            applyDarkModeTextColors()
-            applyDarkModeCardBackgrounds()
-            applyDarkModeSliderColors()
         } else if (darkMode) {
             mainLayout.setBackgroundColor(resources.getColor(R.color.dark_background))
-            applyDarkModeTextColors()
-            applyDarkModeCardBackgrounds()
-            applyDarkModeSliderColors()
         } else {
             mainLayout.setBackgroundColor(resources.getColor(R.color.offwhite))
-            applyLightModeTextColors()
-            applyLightModeCardBackgrounds()
-            applyLightModeSliderColors()
-        }
-    }
-
-    private fun applyDarkModeTextColors() {
-        // Apply white color to all text views
-        focusedTimeTxt.setTextColor(resources.getColor(R.color.white))
-        shortBreakTxt.setTextColor(resources.getColor(R.color.white))
-        longBreakTxt.setTextColor(resources.getColor(R.color.white))
-        sessionsTxt.setTextColor(resources.getColor(R.color.white))
-        alarmTxt.setTextColor(resources.getColor(R.color.white))
-        settingsTxt.setTextColor(resources.getColor(R.color.white))
-        uiSettingsTxt.setTextColor(resources.getColor(R.color.white))
-        aboutTheAppTxt.setTextColor(resources.getColor(R.color.white))
-        runningTimerTxt.setTextColor(resources.getColor(R.color.white))
-        madeWithLoveTxt.setTextColor(resources.getColor(R.color.white))
-        backBtn.setImageResource(R.drawable.back_white)
-        ft.setTextColor(resources.getColor(R.color.white))
-        sb.setTextColor(resources.getColor(R.color.white))
-        lb.setTextColor(resources.getColor(R.color.white))
-        s.setTextColor(resources.getColor(R.color.white))
-        ass.setTextColor(resources.getColor(R.color.white))
-        dm.setTextColor(resources.getColor(R.color.white))
-        am.setTextColor(resources.getColor(R.color.white))
-        gr.setTextColor(resources.getColor(R.color.white))
-        ri.setTextColor(resources.getColor(R.color.white))
-        a.setTextColor(resources.getColor(R.color.white))
-    }
-
-    private fun applyLightModeTextColors() {
-        // Apply default colors
-        focusedTimeTxt.setTextColor(resources.getColor(R.color.black))
-        shortBreakTxt.setTextColor(resources.getColor(R.color.black))
-        longBreakTxt.setTextColor(resources.getColor(R.color.black))
-        sessionsTxt.setTextColor(resources.getColor(R.color.black))
-        settingsTxt.setTextColor(resources.getColor(R.color.black))
-        uiSettingsTxt.setTextColor(resources.getColor(R.color.black))
-        alarmTxt.setTextColor(resources.getColor(R.color.black))
-        aboutTheAppTxt.setTextColor(resources.getColor(R.color.black))
-        runningTimerTxt.setTextColor(resources.getColor(R.color.black))
-        madeWithLoveTxt.setTextColor(resources.getColor(R.color.black))
-        backBtn.setImageResource(R.drawable.back_black)
-        ft.setTextColor(resources.getColor(R.color.black))
-        sb.setTextColor(resources.getColor(R.color.black))
-        lb.setTextColor(resources.getColor(R.color.black))
-        s.setTextColor(resources.getColor(R.color.black))
-        ass.setTextColor(resources.getColor(R.color.black))
-        dm.setTextColor(resources.getColor(R.color.black))
-        am.setTextColor(resources.getColor(R.color.black))
-        gr.setTextColor(resources.getColor(R.color.black))
-        ri.setTextColor(resources.getColor(R.color.black))
-        a.setTextColor(resources.getColor(R.color.black))
-    }
-
-    private fun applyDarkModeCardBackgrounds() {
-        // Find all card backgrounds and set them to grey
-        val cardBackgrounds = listOf(
-            findViewById<LinearLayout>(R.id.focused_time_card_bg),
-            findViewById<LinearLayout>(R.id.short_break_card_bg),
-            findViewById<LinearLayout>(R.id.long_break_card_bg),
-            findViewById<LinearLayout>(R.id.sessions_card_bg),
-            findViewById<LinearLayout>(R.id.alarm_card_bg),
-            findViewById<RelativeLayout>(R.id.auto_start_sessions_card_bg),
-            findViewById<RelativeLayout>(R.id.dark_mode_card_bg),
-            findViewById<RelativeLayout>(R.id.amoled_card_bg),
-            findViewById<LinearLayout>(R.id.github_card_bg)
-        )
-
-        cardBackgrounds.forEach { card ->
-            card.setBackgroundColor(resources.getColor(R.color.dark_card_background))
-        }
-    }
-
-    private fun applyLightModeCardBackgrounds() {
-        // Reset card backgrounds to default
-        val cardBackgrounds = listOf(
-            findViewById<LinearLayout>(R.id.focused_time_card_bg),
-            findViewById<LinearLayout>(R.id.short_break_card_bg),
-            findViewById<LinearLayout>(R.id.long_break_card_bg),
-            findViewById<LinearLayout>(R.id.sessions_card_bg),
-            findViewById<LinearLayout>(R.id.alarm_card_bg),
-            findViewById<RelativeLayout>(R.id.auto_start_sessions_card_bg),
-            findViewById<RelativeLayout>(R.id.dark_mode_card_bg),
-            findViewById<RelativeLayout>(R.id.amoled_card_bg),
-            findViewById<LinearLayout>(R.id.github_card_bg)
-        )
-
-        cardBackgrounds.forEach { card ->
-            card.setBackgroundColor(resources.getColor(R.color.white))
-        }
-    }
-
-    private fun applyDarkModeSliderColors() {
-        focusedTimeSlider.apply {
-            setTrackActiveTintList(resources.getColorStateList(R.color.slider_light))
-            setTrackInactiveTintList(resources.getColorStateList(R.color.medium_red))
-            setThumbTintList(resources.getColorStateList(R.color.light_red))
-        }
-        shortBreakSlider.apply {
-            setTrackActiveTintList(resources.getColorStateList(R.color.slider_light))
-            setTrackInactiveTintList(resources.getColorStateList(R.color.medium_red))
-            setThumbTintList(resources.getColorStateList(R.color.light_red))
-        }
-        longBreakSlider.apply {
-            setTrackActiveTintList(resources.getColorStateList(R.color.slider_light))
-            setTrackInactiveTintList(resources.getColorStateList(R.color.medium_red))
-            setThumbTintList(resources.getColorStateList(R.color.light_red))
-        }
-        sessionsSlider.apply {
-            setTrackActiveTintList(resources.getColorStateList(R.color.slider_light))
-            setTrackInactiveTintList(resources.getColorStateList(R.color.medium_red))
-            setThumbTintList(resources.getColorStateList(R.color.light_red))
-        }
-        alarmSlider.apply {
-            setTrackActiveTintList(resources.getColorStateList(R.color.slider_light))
-            setTrackInactiveTintList(resources.getColorStateList(R.color.medium_red))
-            setThumbTintList(resources.getColorStateList(R.color.light_red))
-        }
-    }
-
-    private fun applyLightModeSliderColors() {
-        focusedTimeSlider.apply {
-            setTrackActiveTintList(resources.getColorStateList(R.color.medium_red))
-            setTrackInactiveTintList(resources.getColorStateList(R.color.slider_light))
-            setThumbTintList(resources.getColorStateList(R.color.medium_red))
-        }
-        shortBreakSlider.apply {
-            setTrackActiveTintList(resources.getColorStateList(R.color.medium_red))
-            setTrackInactiveTintList(resources.getColorStateList(R.color.slider_light))
-            setThumbTintList(resources.getColorStateList(R.color.medium_red))
-        }
-        longBreakSlider.apply {
-            setTrackActiveTintList(resources.getColorStateList(R.color.medium_red))
-            setTrackInactiveTintList(resources.getColorStateList(R.color.slider_light))
-            setThumbTintList(resources.getColorStateList(R.color.medium_red))
-        }
-        sessionsSlider.apply {
-            setTrackActiveTintList(resources.getColorStateList(R.color.medium_red))
-            setTrackInactiveTintList(resources.getColorStateList(R.color.slider_light))
-            setThumbTintList(resources.getColorStateList(R.color.medium_red))
-        }
-        alarmSlider.apply {
-            setTrackActiveTintList(resources.getColorStateList(R.color.medium_red))
-            setTrackInactiveTintList(resources.getColorStateList(R.color.slider_light))
-            setThumbTintList(resources.getColorStateList(R.color.medium_red))
         }
     }
 
@@ -353,17 +195,32 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         darkModeToggle.setOnCheckedChangeListener { _, isChecked ->
-            sharedPreferences.edit().putBoolean("darkMode", isChecked).apply()
             if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                amoledToggle.isChecked = false
+                sharedPreferences.edit().apply {
+                    putBoolean("darkMode", true)
+                    putBoolean("amoledMode", false)
+                    apply()
+                }
             } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                sharedPreferences.edit().putBoolean("darkMode", false).apply()
             }
+            AppCompatDelegate.setDefaultNightMode(if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
             applyTheme()
         }
 
         amoledToggle.setOnCheckedChangeListener { _, isChecked ->
-            sharedPreferences.edit().putBoolean("amoledMode", isChecked).apply()
+            if (isChecked) {
+                darkModeToggle.isChecked = false
+                sharedPreferences.edit().apply {
+                    putBoolean("amoledMode", true)
+                    putBoolean("darkMode", false)
+                    apply()
+                }
+            } else {
+                sharedPreferences.edit().putBoolean("amoledMode", false).apply()
+            }
+            AppCompatDelegate.setDefaultNightMode(if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
             applyTheme()
         }
 
@@ -371,6 +228,13 @@ class SettingsActivity : AppCompatActivity() {
             vibrate()
             val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
             intent.data = android.net.Uri.parse("https://github.com/Arijit-05/Minimal-Pomodoro")
+            startActivity(intent)
+        }
+
+        supportCard.setOnClickListener {
+            vibrate()
+            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
+            intent.data = android.net.Uri.parse("https://ko-fi.com/arijitroy05/goal?g=0")
             startActivity(intent)
         }
     }

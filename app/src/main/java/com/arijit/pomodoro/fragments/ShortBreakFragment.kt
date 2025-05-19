@@ -75,36 +75,10 @@ class ShortBreakFragment : Fragment() {
         
         val parentLayout = requireActivity().findViewById<RelativeLayout>(R.id.main)
         val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
-        val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
 
         if (amoledMode) {
-            minTxt.setTextColor(resources.getColor(R.color.light_green))
-            secTxt.setTextColor(resources.getColor(R.color.light_green))
-            shortBreakCardBg.setBackgroundColor(resources.getColor(R.color.medium_green))
-            shortBreakTxt.setTextColor(resources.getColor(R.color.deep_green))
-            coffee.setImageResource(R.drawable.coffee_dark_green)
-            resetBtn.setImageResource(R.drawable.reset_green_dark)
-            backToTimer.setTextColor(resources.getColor(R.color.light_green))
-            skipBtn.setImageResource(R.drawable.skip_green_dark)
-        } else if (darkMode) {
-            minTxt.setTextColor(resources.getColor(R.color.light_green))
-            secTxt.setTextColor(resources.getColor(R.color.light_green))
-            shortBreakCardBg.setBackgroundColor(resources.getColor(R.color.medium_green))
-            shortBreakTxt.setTextColor(resources.getColor(R.color.deep_green))
-            coffee.setImageResource(R.drawable.coffee_dark_green)
-            resetBtn.setImageResource(R.drawable.reset_green_dark)
-            backToTimer.setTextColor(resources.getColor(R.color.light_green))
-            skipBtn.setImageResource(R.drawable.skip_green_dark)
-        } else {
-            minTxt.setTextColor(resources.getColor(R.color.deep_green))
-            secTxt.setTextColor(resources.getColor(R.color.deep_green))
-            shortBreakCardBg.setBackgroundColor(resources.getColor(R.color.deep_green))
-            shortBreakTxt.setTextColor(resources.getColor(R.color.light_green))
-            coffee.setImageResource(R.drawable.coffee)
-            backToTimer.setTextColor(resources.getColor(R.color.deep_green))
-            resetBtn.setImageResource(R.drawable.reset_green)
-            skipBtn.setImageResource(R.drawable.skip_green)
+            parentLayout.setBackgroundColor(resources.getColor(android.R.color.black))
         }
 
         updateCountdownText()

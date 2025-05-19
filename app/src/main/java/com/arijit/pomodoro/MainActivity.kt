@@ -116,11 +116,11 @@ class MainActivity : AppCompatActivity() {
 
         if (amoledMode) {
             mainLayout.setBackgroundColor(resources.getColor(android.R.color.black))
-        } else {
+        } else if (darkMode) {
             when (fragmentType) {
-                "timer" -> mainLayout.setBackgroundResource(if (darkMode) R.color.deep_red else R.color.light_red)
-                "short_break" -> mainLayout.setBackgroundResource(if (darkMode) R.color.deep_green else R.color.light_green)
-                "long_break" -> mainLayout.setBackgroundResource(if (darkMode) R.color.deep_blue else R.color.light_blue)
+                "timer" -> mainLayout.setBackgroundResource(R.color.deep_red)
+                "short_break" -> mainLayout.setBackgroundResource(R.color.deep_green)
+                "long_break" -> mainLayout.setBackgroundResource(R.color.deep_blue)
             }
         }
     }
@@ -166,16 +166,12 @@ class MainActivity : AppCompatActivity() {
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
 
         if (amoledMode) {
-            settings_btn.setImageResource(R.drawable.setting_dark)
-            sessionsTxt.setTextColor(resources.getColor(R.color.white))
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            sharedPreferences.edit().putBoolean("darkMode", false).apply()
         } else if (darkMode) {
-            settings_btn.setImageResource(R.drawable.setting_dark)
-            sessionsTxt.setTextColor(resources.getColor(R.color.white))
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            sharedPreferences.edit().putBoolean("amoledMode", false).apply()
         } else {
-            settings_btn.setImageResource(R.drawable.settings)
-            sessionsTxt.setTextColor(resources.getColor(R.color.black))
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
@@ -188,6 +184,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // Update theme when configuration changes
+        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        val darkMode = sharedPreferences.getBoolean("darkMode", false)
+        val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
+
+        if (amoledMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            sharedPreferences.edit().putBoolean("darkMode", false).apply()
+        } else if (darkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            sharedPreferences.edit().putBoolean("amoledMode", false).apply()
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         // Update theme when returning from settings
@@ -196,16 +210,12 @@ class MainActivity : AppCompatActivity() {
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
 
         if (amoledMode) {
-            settings_btn.setImageResource(R.drawable.setting_dark)
-            sessionsTxt.setTextColor(resources.getColor(R.color.white))
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            sharedPreferences.edit().putBoolean("darkMode", false).apply()
         } else if (darkMode) {
-            settings_btn.setImageResource(R.drawable.setting_dark)
-            sessionsTxt.setTextColor(resources.getColor(R.color.white))
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            sharedPreferences.edit().putBoolean("amoledMode", false).apply()
         } else {
-            settings_btn.setImageResource(R.drawable.settings)
-            sessionsTxt.setTextColor(resources.getColor(R.color.black))
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
