@@ -156,12 +156,19 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        // Reset timer state flags when app starts
+        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        sharedPreferences.edit().apply {
+            putBoolean("isTimerRunning", false)
+            putBoolean("isBreakActive", false)
+            apply()
+        }
+
         // Check and request notification permission
         checkNotificationPermission()
 
         sessionsTxt = findViewById(R.id.sessions_txt)
         settings_btn = findViewById(R.id.settings_btn)
-        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
 
