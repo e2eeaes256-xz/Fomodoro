@@ -46,7 +46,22 @@ class LongBreakFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadSettings()
+        if (savedInstanceState != null) {
+            timeLeftInMillis = savedInstanceState.getLong("timeLeftInMillis")
+            timerRunning = savedInstanceState.getBoolean("timerRunning")
+            currentSession = savedInstanceState.getInt("currentSession")
+            totalSessions = savedInstanceState.getInt("totalSessions")
+        } else {
+            loadSettings()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putLong("timeLeftInMillis", timeLeftInMillis)
+        outState.putBoolean("timerRunning", timerRunning)
+        outState.putInt("currentSession", currentSession)
+        outState.putInt("totalSessions", totalSessions)
     }
 
     private fun loadSettings() {
@@ -105,6 +120,15 @@ class LongBreakFragment : Fragment() {
         skipBtn.setOnClickListener {
             vibrate()
             loadTimerFragment()
+        }
+
+        // Restore timer state if it was running
+        if (timerRunning) {
+            playBtn.visibility = View.GONE
+            pauseBtn.visibility = View.VISIBLE
+            resetBtn.visibility = View.VISIBLE
+            skipBtn.visibility = View.VISIBLE
+            startTimer()
         }
 
         return view

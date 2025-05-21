@@ -48,7 +48,26 @@ class ShortBreakFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadSettings()
+        if (savedInstanceState != null) {
+            timeLeftInMillis = savedInstanceState.getLong("timeLeftInMillis")
+            timerRunning = savedInstanceState.getBoolean("timerRunning")
+            currentSession = savedInstanceState.getInt("currentSession")
+            totalSessions = savedInstanceState.getInt("totalSessions")
+            autoStart = savedInstanceState.getBoolean("autoStart")
+            isFromTimer = savedInstanceState.getBoolean("isFromTimer")
+        } else {
+            loadSettings()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putLong("timeLeftInMillis", timeLeftInMillis)
+        outState.putBoolean("timerRunning", timerRunning)
+        outState.putInt("currentSession", currentSession)
+        outState.putInt("totalSessions", totalSessions)
+        outState.putBoolean("autoStart", autoStart)
+        outState.putBoolean("isFromTimer", isFromTimer)
     }
 
     private fun loadSettings() {
@@ -109,8 +128,14 @@ class ShortBreakFragment : Fragment() {
             loadLongBreakFragment()
         }
 
-        // Auto-start timer only if coming from TimerFragment and auto-start is enabled
-        if (autoStart && isFromTimer) {
+        // Restore timer state if it was running
+        if (timerRunning) {
+            playBtn.visibility = View.GONE
+            pauseBtn.visibility = View.VISIBLE
+            resetBtn.visibility = View.VISIBLE
+            skipBtn.visibility = View.VISIBLE
+            startTimer()
+        } else if (autoStart && isFromTimer) {
             startTimer()
         }
 

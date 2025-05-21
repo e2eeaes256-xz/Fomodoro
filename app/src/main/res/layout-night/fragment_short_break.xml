@@ -7,7 +7,7 @@
     tools:context=".fragments.ShortBreakFragment">
 
     <LinearLayout
-        android:id="@+id/linear_layout"
+        android:id="@+id/relative_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
@@ -159,7 +159,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/light_green"
         android:textSize="20sp"
-        android:layout_below="@id/linear_layout"
+        android:layout_below="@id/relative_layout"
         android:layout_centerHorizontal="true"
         android:text="Back to timer"
         android:fontFamily="@font/montserrat_regular"

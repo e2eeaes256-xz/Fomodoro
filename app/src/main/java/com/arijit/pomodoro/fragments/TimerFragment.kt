@@ -46,7 +46,16 @@ class TimerFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadSettings()
+        if (savedInstanceState != null) {
+            timeLeftInMillis = savedInstanceState.getLong("timeLeftInMillis")
+            timerRunning = savedInstanceState.getBoolean("timerRunning")
+            currentSession = savedInstanceState.getInt("currentSession")
+            totalSessions = savedInstanceState.getInt("totalSessions")
+            autoStart = savedInstanceState.getBoolean("autoStart")
+            isFromShortBreak = savedInstanceState.getBoolean("isFromShortBreak")
+        } else {
+            loadSettings()
+        }
     }
     
     private fun loadSettings() {
@@ -103,8 +112,14 @@ class TimerFragment : Fragment() {
             loadShortBreakFragment()
         }
 
-        // Auto-start timer only if coming from ShortBreakFragment and auto-start is enabled
-        if (autoStart && isFromShortBreak) {
+        // Restore timer state if it was running
+        if (timerRunning) {
+            playBtn.visibility = View.GONE
+            pauseBtn.visibility = View.VISIBLE
+            resetBtn.visibility = View.VISIBLE
+            skipBtn.visibility = View.VISIBLE
+            startTimer()
+        } else if (autoStart && isFromShortBreak) {
             startTimer()
         }
 
@@ -277,6 +292,16 @@ class TimerFragment : Fragment() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putLong("timeLeftInMillis", timeLeftInMillis)
+        outState.putBoolean("timerRunning", timerRunning)
+        outState.putInt("currentSession", currentSession)
+        outState.putInt("totalSessions", totalSessions)
+        outState.putBoolean("autoStart", autoStart)
+        outState.putBoolean("isFromShortBreak", isFromShortBreak)
     }
 
     companion object {

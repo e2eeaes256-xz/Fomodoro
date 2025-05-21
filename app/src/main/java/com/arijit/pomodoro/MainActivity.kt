@@ -182,7 +182,9 @@ class MainActivity : AppCompatActivity() {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
-        showTimerFragment()
+        if (savedInstanceState == null) {
+            showTimerFragment()
+        }
 
         settings_btn.setOnClickListener {
             vibrate()
@@ -237,6 +239,26 @@ class MainActivity : AppCompatActivity() {
             } else {
                 vibrator.vibrate(50) // Vibrate for 50 milliseconds
             }
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        // Save the current fragment type
+        val currentFragment = supportFragmentManager.findFragmentById(R.id.frame_layout)
+        if (currentFragment != null) {
+            outState.putString("currentFragment", currentFragment.javaClass.simpleName)
+        }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        // Restore the appropriate fragment based on the saved state
+        val fragmentType = savedInstanceState.getString("currentFragment")
+        when (fragmentType) {
+            "TimerFragment" -> setMainBackgroundForFragment("timer")
+            "ShortBreakFragment" -> setMainBackgroundForFragment("short_break")
+            "LongBreakFragment" -> setMainBackgroundForFragment("long_break")
         }
     }
 }
