@@ -16,21 +16,22 @@ Fomodoro is a simple, customizable Pomodoro timer Android app designed to help y
 
 <table>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/faba92a6-6423-437e-8eff-7968a6b04c17" width="200"/></td>
-    <td><img src="https://github.com/user-attachments/assets/4f6f8742-100f-4a31-be0a-214560984960" width="200"/></td>
-    <td><img src="https://github.com/user-attachments/assets/c6691ff3-78ec-4e96-ae03-9e4f35fa7adb" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/d5b21f6c-6467-4b92-ad7c-530604d44dde" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/fb90b579-b087-4d35-9d18-396db7f6255b" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/fe567f97-c93d-48cf-b09b-2f3c0722a5ef" width="200"/></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/b3bfc1a6-40f0-43a6-ae7c-9ea60ccc1137" width="200"/></td>
-    <td><img src="https://github.com/user-attachments/assets/5f745880-8f4e-4183-834c-87fb862ea67d" width="200"/></td>
-    <td><img src="https://github.com/user-attachments/assets/88d0cbe9-3613-40d0-ac0a-45d6e6fbfe76" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/5f2d6733-ff85-4936-8caa-567ab58e61da" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/ec704c3a-201c-4ebc-9487-f452e0c92222" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/a9f1333b-eb10-4eca-9e13-a8ccf4989cd3" width="200"/></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/d7718d8c-bedb-4513-8a08-10209177865f" width="200"/></td>
-    <td><img src="https://github.com/user-attachments/assets/74dc78b6-d2f1-485c-9e17-bf5855ee1b62" width="200"/></td>
-    <td><img src="https://github.com/user-attachments/assets/b2b2502f-9f38-4088-95aa-81f950c54698" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/28147867-1bf7-4b93-b836-93f9f85d118c" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/7a3145a6-3fa2-4e10-b58b-05e008f7b094" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/122ba9da-6179-4c21-a656-c427d461e9c0" width="200"/></td>
   </tr>
 </table>
+
 
 ## Getting Started
 
