@@ -88,14 +88,30 @@
                                 android:textColor="@color/black"
                                 android:textSize="18sp" />
 
-                            <TextView
+                            <EditText
                                 android:id="@+id/focused_time_txt"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@id/mins_txt"
+                                android:layout_centerVertical="true"
+                                android:background="@android:color/transparent"
+                                android:fontFamily="@font/montserrat_regular"
+                                android:gravity="end"
+                                android:inputType="number"
+                                android:maxLines="1"
+                                android:minWidth="40dp"
+                                android:text="25"
+                                android:textColor="@color/black"
+                                android:textSize="16sp" />
+
+                            <TextView
+                                android:id="@+id/mins_txt"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:fontFamily="@font/montserrat_regular"
-                                android:text="25 mins"
+                                android:text=" mins"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
 
@@ -149,14 +165,30 @@
                                 android:textColor="@color/black"
                                 android:textSize="18sp" />
 
-                            <TextView
+                            <EditText
                                 android:id="@+id/short_break_txt"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@id/mins_txt_sb"
+                                android:layout_centerVertical="true"
+                                android:fontFamily="@font/montserrat_regular"
+                                android:text="5"
+                                android:textColor="@color/black"
+                                android:textSize="16sp"
+                                android:inputType="number"
+                                android:maxLines="1"
+                                android:background="@android:color/transparent"
+                                android:gravity="end"
+                                android:minWidth="40dp"/>
+
+                            <TextView
+                                android:id="@+id/mins_txt_sb"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:fontFamily="@font/montserrat_regular"
-                                android:text="5 mins"
+                                android:text=" mins"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
 
@@ -210,14 +242,30 @@
                                 android:textColor="@color/black"
                                 android:textSize="18sp" />
 
-                            <TextView
+                            <EditText
                                 android:id="@+id/long_break_txt"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@id/mins_txt_lb"
+                                android:layout_centerVertical="true"
+                                android:fontFamily="@font/montserrat_regular"
+                                android:text="10"
+                                android:textColor="@color/black"
+                                android:textSize="16sp"
+                                android:inputType="number"
+                                android:maxLines="1"
+                                android:background="@android:color/transparent"
+                                android:gravity="end"
+                                android:minWidth="40dp"/>
+
+                            <TextView
+                                android:id="@+id/mins_txt_lb"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:fontFamily="@font/montserrat_regular"
-                                android:text="10 mins"
+                                android:text=" mins"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
 
@@ -229,7 +277,7 @@
                             android:layout_height="wrap_content"
                             android:stepSize="1"
                             android:value="10"
-                            android:valueFrom="5"
+                            android:valueFrom="1"
                             android:valueTo="30"
                             app:thumbColor="#782323"
                             app:tickVisible="false"
@@ -271,14 +319,30 @@
                                 android:textColor="@color/black"
                                 android:textSize="18sp" />
 
-                            <TextView
+                            <EditText
                                 android:id="@+id/sessions_txt"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@id/sess_txt"
+                                android:layout_centerVertical="true"
+                                android:fontFamily="@font/montserrat_regular"
+                                android:text="4"
+                                android:textColor="@color/black"
+                                android:textSize="16sp"
+                                android:inputType="number"
+                                android:maxLines="1"
+                                android:background="@android:color/transparent"
+                                android:gravity="end"
+                                android:minWidth="40dp"/>
+
+                            <TextView
+                                android:id="@+id/sess_txt"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:fontFamily="@font/montserrat_regular"
-                                android:text="4 sessions"
+                                android:text=" sessions"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
 
@@ -332,14 +396,30 @@
                                 android:textColor="@color/black"
                                 android:textSize="18sp" />
 
-                            <TextView
+                            <EditText
                                 android:id="@+id/alarm_txt"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@id/times_txt"
+                                android:layout_centerVertical="true"
+                                android:fontFamily="@font/montserrat_regular"
+                                android:text="3"
+                                android:textColor="@color/black"
+                                android:textSize="16sp"
+                                android:inputType="number"
+                                android:maxLines="1"
+                                android:background="@android:color/transparent"
+                                android:gravity="end"
+                                android:minWidth="40dp"/>
+
+                            <TextView
+                                android:id="@+id/times_txt"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
                                 android:fontFamily="@font/montserrat_regular"
-                                android:text="3 seconds"
+                                android:text=" times"
                                 android:textColor="@color/black"
                                 android:textSize="16sp" />
 
@@ -413,11 +493,11 @@
                 android:id="@+id/running_timer_txt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
                 android:layout_marginHorizontal="22dp"
                 android:fontFamily="@font/montserrat_regular"
                 android:text="Timer and UI Settings are hidden during an ongoing pomodoro session. Pause the current timer to change the settings. It will reset the timer"
-                android:textColor="@color/black" />
+                android:textColor="@color/black"
+                android:visibility="gone" />
 
         </LinearLayout>
 
@@ -429,22 +509,22 @@
             android:layout_below="@id/timer_settings_placeholder"
             android:layout_marginStart="22dp"
             android:layout_marginTop="15dp"
-            android:visibility="visible"
             android:fontFamily="@font/montserrat_regular"
             android:text="UI settings"
             android:textColor="@color/black"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="visible" />
 
         <!-- UI SETTINGS COMPONENTS -->
         <LinearLayout
             android:id="@+id/ui_settings_components"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:visibility="visible"
             android:layout_below="@id/ui_settings_txt"
             android:layout_marginHorizontal="22dp"
             android:layout_marginTop="5dp"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="visible">
 
             <!-- DARK MODE CARD -->
             <androidx.cardview.widget.CardView
@@ -531,14 +611,196 @@
 
         </LinearLayout>
 
-        <!-- BACKGROUND MUSIC OPTIONS WILL BE ADDED -->
+        <!-- BACKGROUND MUSIC TXT -->
+        <TextView
+            android:id="@+id/background_music_txt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/ui_settings_components"
+            android:layout_marginStart="22dp"
+            android:layout_marginTop="15dp"
+            android:fontFamily="@font/montserrat_regular"
+            android:text="Background Music"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:visibility="visible" />
+
+        <!-- BACKGROUND MUSIC COMPONENTS -->
+        <LinearLayout
+            android:id="@+id/background_music_components"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/background_music_txt"
+            android:layout_marginHorizontal="22dp"
+            android:layout_marginTop="5dp"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <!-- BROWN NOISE CARD -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/brown_noise_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:cardCornerRadius="20dp">
+
+                <RelativeLayout
+                    android:id="@+id/brown_noise_card_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/white"
+                    android:padding="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:text="Brown Noise"
+                        android:textColor="@color/black"
+                        android:textSize="18sp" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/brown_noise_toggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="15dp"
+                        android:layout_alignParentEnd="true"
+                        app:thumbTint="@color/white"
+                        app:trackTint="@color/switch_track_tint"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- WHITE NOISE CARD -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/white_noise_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:cardCornerRadius="20dp">
+
+                <RelativeLayout
+                    android:id="@+id/white_noise_card_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/white"
+                    android:padding="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:text="White Noise"
+                        android:textColor="@color/black"
+                        android:textSize="18sp" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/white_noise_toggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="15dp"
+                        android:layout_alignParentEnd="true"
+                        app:thumbTint="@color/white"
+                        app:trackTint="@color/switch_track_tint"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- RAINFALL CARD -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/rainfall_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:cardCornerRadius="20dp">
+
+                <RelativeLayout
+                    android:id="@+id/rainfall_card_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/white"
+                    android:padding="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:text="Rainfall"
+                        android:textColor="@color/black"
+                        android:textSize="18sp" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/rainfall_toggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="15dp"
+                        android:layout_alignParentEnd="true"
+                        app:thumbTint="@color/white"
+                        app:trackTint="@color/switch_track_tint"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- LIGHT JAZZ CARD -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/light_jazz_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:cardCornerRadius="20dp">
+
+                <RelativeLayout
+                    android:id="@+id/light_jazz_card_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/white"
+                    android:padding="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:text="Light jazz"
+                        android:textColor="@color/black"
+                        android:textSize="18sp" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/light_jazz_toggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="15dp"
+                        android:layout_alignParentEnd="true"
+                        app:thumbTint="@color/white"
+                        app:trackTint="@color/switch_track_tint"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <!-- BLANK SPACE -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+        </LinearLayout>
 
         <!-- ABOUT THE APP TXT -->
         <TextView
             android:id="@+id/about_the_app_txt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/ui_settings_components"
+            android:layout_below="@id/background_music_components"
             android:layout_marginStart="22dp"
             android:layout_marginTop="15dp"
             android:fontFamily="@font/montserrat_regular"

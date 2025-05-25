@@ -17,6 +17,32 @@
         android:layout_marginEnd="20dp"
         android:layout_marginTop="15dp" />
 
+    <!-- MUSIC ANIMATED BUTTON -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        app:lottie_rawRes="@raw/music_anim"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        android:visibility="gone"
+        android:id="@+id/music_animated_btn"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="15dp" />
+
+    <!-- MUSIC BUTTON -->
+    <ImageView
+        android:id="@+id/music_btn"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:visibility="visible"
+        android:src="@drawable/music_white"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="15dp" />
+
     <!-- CONTAINER -->
     <FrameLayout
         android:id="@+id/frame_layout"

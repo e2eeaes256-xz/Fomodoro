@@ -20,20 +20,37 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.slider.Slider
+import android.widget.EditText
+import androidx.core.widget.addTextChangedListener
 import android.content.res.Configuration
 import androidx.activity.result.contract.ActivityResultContracts
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Notification
+import android.content.pm.PackageManager
+import android.os.Environment
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.net.URL
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var backBtn: ImageView
-    private lateinit var focusedTimeTxt: TextView
+    private lateinit var focusedTimeTxt: EditText
     private lateinit var focusedTimeSlider: Slider
-    private lateinit var shortBreakTxt: TextView
+    private lateinit var shortBreakTxt: EditText
     private lateinit var shortBreakSlider: Slider
-    private lateinit var longBreakTxt: TextView
+    private lateinit var longBreakTxt: EditText
     private lateinit var longBreakSlider: Slider
-    private lateinit var sessionsTxt: TextView
+    private lateinit var sessionsTxt: EditText
     private lateinit var sessionsSlider: Slider
-    private lateinit var alarmTxt: TextView
+    private lateinit var alarmTxt: EditText
     private lateinit var alarmSlider: Slider
     private lateinit var autoStartSessions: MaterialSwitch
     private lateinit var darkModeToggle: MaterialSwitch
@@ -48,6 +65,34 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var madeWithLoveTxt: TextView
     private lateinit var uiSettingsComponents: LinearLayout
     private lateinit var timerSettingsComponents: LinearLayout
+    private lateinit var ri: TextView
+    private lateinit var a: TextView
+    private lateinit var ft: TextView
+    private lateinit var sb: TextView
+    private lateinit var lb: TextView
+    private lateinit var s: TextView
+    private lateinit var ass: TextView
+    private lateinit var dm: TextView
+    private lateinit var am: TextView
+    private lateinit var gr: TextView
+    private lateinit var brownNoiseToggle: MaterialSwitch
+    private lateinit var whiteNoiseToggle: MaterialSwitch
+    private lateinit var rainfallToggle: MaterialSwitch
+    private lateinit var lightJazzToggle: MaterialSwitch
+    private val CHANNEL_ID = "download_channel"
+    private val NOTIFICATION_ID = 1
+
+    private var isUpdatingSlider = false
+
+    private val storagePermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.entries.all { it.value }
+        if (allGranted) {
+            // Permissions granted, proceed with download
+            handleMusicToggle()
+        }
+    }
 
     companion object {
         const val RESULT_TIMER_SETTINGS_CHANGED = 100
@@ -69,6 +114,9 @@ class SettingsActivity : AppCompatActivity() {
         setupListeners()
         applyTheme()
         checkTimerState()
+        createNotificationChannel()
+        initializeMusicToggles()
+        setupMusicToggleListeners()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -121,8 +169,22 @@ class SettingsActivity : AppCompatActivity() {
         runningTimerTxt = findViewById(R.id.running_timer_txt)
         madeWithLoveTxt = findViewById(R.id.made_with_love_txt)
         aboutTheAppTxt = findViewById(R.id.about_the_app_txt)
+        ft = findViewById(R.id.ft)
+        sb = findViewById(R.id.sb)
+        lb = findViewById(R.id.lb)
+        s = findViewById(R.id.s)
+        ass = findViewById(R.id.ass)
+        dm = findViewById(R.id.dm)
+        am = findViewById(R.id.am)
+        gr = findViewById(R.id.gr)
+        ri = findViewById(R.id.ri)
+        a = findViewById(R.id.a)
         uiSettingsComponents = findViewById(R.id.ui_settings_components)
         timerSettingsComponents = findViewById(R.id.timer_settings_components)
+        brownNoiseToggle = findViewById(R.id.brown_noise_toggle)
+        whiteNoiseToggle = findViewById(R.id.white_noise_toggle)
+        rainfallToggle = findViewById(R.id.rainfall_toggle)
+        lightJazzToggle = findViewById(R.id.light_jazz_toggle)
     }
 
     private fun loadSavedSettings() {
@@ -165,29 +227,133 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         focusedTimeSlider.addOnChangeListener { _, value, _ ->
-            focusedTimeTxt.text = "${value.toInt()} mins"
+            if (!isUpdatingSlider) {
+                isUpdatingSlider = true
+                focusedTimeTxt.setText("${value.toInt()}")
+                isUpdatingSlider = false
+            }
             markTimerSettingsModified()
+        }
+
+        focusedTimeTxt.addTextChangedListener { text ->
+            if (!isUpdatingSlider) {
+                isUpdatingSlider = true
+                val value = text.toString().toIntOrNull()
+                if (value != null) {
+                    val clampedValue = value.coerceIn(focusedTimeSlider.valueFrom.toInt(), focusedTimeSlider.valueTo.toInt())
+                    focusedTimeSlider.value = clampedValue.toFloat()
+                    if (value != clampedValue) {
+                        focusedTimeTxt.setText(clampedValue.toString())
+                        focusedTimeTxt.setSelection(focusedTimeTxt.text.length)
+                    }
+                    markTimerSettingsModified()
+                }
+                isUpdatingSlider = false
+            }
         }
 
         shortBreakSlider.addOnChangeListener { _, value, _ ->
-            shortBreakTxt.text = "${value.toInt()} mins"
+            if (!isUpdatingSlider) {
+                isUpdatingSlider = true
+                shortBreakTxt.setText("${value.toInt()}")
+                isUpdatingSlider = false
+            }
             markTimerSettingsModified()
+        }
+
+        shortBreakTxt.addTextChangedListener { text ->
+            if (!isUpdatingSlider) {
+                isUpdatingSlider = true
+                val value = text.toString().toIntOrNull()
+                if (value != null) {
+                    val clampedValue = value.coerceIn(shortBreakSlider.valueFrom.toInt(), shortBreakSlider.valueTo.toInt())
+                    shortBreakSlider.value = clampedValue.toFloat()
+                    if (value != clampedValue) {
+                        shortBreakTxt.setText(clampedValue.toString())
+                        shortBreakTxt.setSelection(shortBreakTxt.text.length)
+                    }
+                    markTimerSettingsModified()
+                }
+                isUpdatingSlider = false
+            }
         }
 
         longBreakSlider.addOnChangeListener { _, value, _ ->
-            longBreakTxt.text = "${value.toInt()} mins"
+            if (!isUpdatingSlider) {
+                isUpdatingSlider = true
+                longBreakTxt.setText("${value.toInt()}")
+                isUpdatingSlider = false
+            }
             markTimerSettingsModified()
+        }
+
+        longBreakTxt.addTextChangedListener { text ->
+            if (!isUpdatingSlider) {
+                isUpdatingSlider = true
+                val value = text.toString().toIntOrNull()
+                if (value != null) {
+                    val clampedValue = value.coerceIn(longBreakSlider.valueFrom.toInt(), longBreakSlider.valueTo.toInt())
+                    longBreakSlider.value = clampedValue.toFloat()
+                    if (value != clampedValue) {
+                        longBreakTxt.setText(clampedValue.toString())
+                        longBreakTxt.setSelection(longBreakTxt.text.length)
+                    }
+                    markTimerSettingsModified()
+                }
+                isUpdatingSlider = false
+            }
         }
 
         sessionsSlider.addOnChangeListener { _, value, _ ->
-            val sessions = value.toInt()
-            sessionsTxt.text = "$sessions sessions"
+            if (!isUpdatingSlider) {
+                isUpdatingSlider = true
+                sessionsTxt.setText("${value.toInt()}")
+                isUpdatingSlider = false
+            }
             markTimerSettingsModified()
         }
 
+        sessionsTxt.addTextChangedListener { text ->
+            if (!isUpdatingSlider) {
+                isUpdatingSlider = true
+                val value = text.toString().toIntOrNull()
+                if (value != null) {
+                    val clampedValue = value.coerceIn(sessionsSlider.valueFrom.toInt(), sessionsSlider.valueTo.toInt())
+                    sessionsSlider.value = clampedValue.toFloat()
+                    if (value != clampedValue) {
+                        sessionsTxt.setText(clampedValue.toString())
+                        sessionsTxt.setSelection(sessionsTxt.text.length)
+                    }
+                    markTimerSettingsModified()
+                }
+                isUpdatingSlider = false
+            }
+        }
+
         alarmSlider.addOnChangeListener { _, value, _ ->
-            alarmTxt.text = "${value.toInt()} seconds"
+            if (!isUpdatingSlider) {
+                isUpdatingSlider = true
+                alarmTxt.setText("${value.toInt()}")
+                isUpdatingSlider = false
+            }
             markTimerSettingsModified()
+        }
+
+        alarmTxt.addTextChangedListener { text ->
+            if (!isUpdatingSlider) {
+                isUpdatingSlider = true
+                val value = text.toString().toIntOrNull()
+                if (value != null) {
+                    val clampedValue = value.coerceIn(alarmSlider.valueFrom.toInt(), alarmSlider.valueTo.toInt())
+                    alarmSlider.value = clampedValue.toFloat()
+                    if (value != clampedValue) {
+                        alarmTxt.setText(clampedValue.toString())
+                        alarmTxt.setSelection(alarmTxt.text.length)
+                    }
+                    markTimerSettingsModified()
+                }
+                isUpdatingSlider = false
+            }
         }
 
         autoStartSessions.setOnCheckedChangeListener { _, _ ->
@@ -244,11 +410,12 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updateTexts() {
-        focusedTimeTxt.text = "${focusedTimeSlider.value.toInt()} mins"
-        shortBreakTxt.text = "${shortBreakSlider.value.toInt()} mins"
-        longBreakTxt.text = "${longBreakSlider.value.toInt()} mins"
+        focusedTimeTxt.setText("${focusedTimeSlider.value.toInt()}")
+        shortBreakTxt.setText("${shortBreakSlider.value.toInt()}")
+        longBreakTxt.setText("${longBreakSlider.value.toInt()}")
         val sessions = sessionsSlider.value.toInt()
-        sessionsTxt.text = "$sessions sessions"
+        sessionsTxt.setText("$sessions")
+        alarmTxt.setText("${alarmSlider.value.toInt()}")
     }
 
     private fun saveSettings() {
@@ -273,6 +440,167 @@ class SettingsActivity : AppCompatActivity() {
             } else {
                 vibrator.vibrate(50)
             }
+        }
+    }
+
+    private fun checkStoragePermissions(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_MEDIA_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+    }
+
+    private fun requestStoragePermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            storagePermissionLauncher.launch(arrayOf(Manifest.permission.READ_MEDIA_AUDIO))
+        } else {
+            storagePermissionLauncher.launch(arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ))
+        }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Download Notifications",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Notifications for audio downloads"
+            }
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun showDownloadNotification(musicName: String) {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Downloading Audio")
+            .setContentText("Downloading $musicName audio")
+            .setSmallIcon(android.R.drawable.stat_sys_download)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    private fun dismissDownloadNotification() {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
+    }
+
+    private fun getMusicFile(musicName: String): File {
+        val musicDir = File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), "pomodoro_music")
+        if (!musicDir.exists()) {
+            musicDir.mkdirs()
+        }
+        return File(musicDir, "${musicName}.mp3")
+    }
+
+    private suspend fun downloadMusic(url: String, musicName: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                val musicFile = getMusicFile(musicName)
+                if (!musicFile.exists()) {
+                    showDownloadNotification(musicName)
+                    val connection = URL(url).openConnection()
+                    connection.connect()
+                    val inputStream = connection.getInputStream()
+                    val outputStream = FileOutputStream(musicFile)
+                    inputStream.copyTo(outputStream)
+                    outputStream.close()
+                    inputStream.close()
+                }
+                dismissDownloadNotification()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                dismissDownloadNotification()
+            }
+        }
+    }
+
+    private fun handleMusicToggle() {
+        val musicName = when {
+            brownNoiseToggle.isChecked -> "brown_noise"
+            whiteNoiseToggle.isChecked -> "white_noise"
+            rainfallToggle.isChecked -> "rainfall"
+            lightJazzToggle.isChecked -> "light_jazz"
+            else -> null
+        }
+
+        if (musicName != null) {
+            val url = when (musicName) {
+                "brown_noise" -> "https://github.com/Arijit-05/fomodoro_assets/releases/download/brown-noise/brown_noise.mp3"
+                "white_noise" -> "https://github.com/Arijit-05/fomodoro_assets/releases/download/white-noise/white_noise.mp3"
+                "rainfall" -> "https://github.com/Arijit-05/fomodoro_assets/releases/download/rainfall/rainfall.mp3"
+                "light_jazz" -> "https://github.com/Arijit-05/fomodoro_assets/releases/download/light-jazz/light_jazz.mp3"
+                else -> null
+            }
+
+            if (url != null) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    downloadMusic(url, musicName)
+                }
+            }
+        }
+    }
+
+    private fun initializeMusicToggles() {
+        // Load saved toggle states
+        val savedMusic = sharedPreferences.getString("selected_music", null)
+        brownNoiseToggle.isChecked = savedMusic == "brown_noise"
+        whiteNoiseToggle.isChecked = savedMusic == "white_noise"
+        rainfallToggle.isChecked = savedMusic == "rainfall"
+        lightJazzToggle.isChecked = savedMusic == "light_jazz"
+    }
+
+    private fun setupMusicToggleListeners() {
+        val toggleListener = { toggle: MaterialSwitch, musicName: String ->
+            if (toggle.isChecked) {
+                // Uncheck other toggles
+                brownNoiseToggle.isChecked = toggle == brownNoiseToggle
+                whiteNoiseToggle.isChecked = toggle == whiteNoiseToggle
+                rainfallToggle.isChecked = toggle == rainfallToggle
+                lightJazzToggle.isChecked = toggle == lightJazzToggle
+
+                // Save selection
+                sharedPreferences.edit().putString("selected_music", musicName).apply()
+
+                // Check permissions and download if needed
+                if (checkStoragePermissions()) {
+                    handleMusicToggle()
+                } else {
+                    requestStoragePermissions()
+                }
+            } else {
+                sharedPreferences.edit().remove("selected_music").apply()
+            }
+        }
+
+        brownNoiseToggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) toggleListener(brownNoiseToggle, "brown_noise")
+        }
+
+        whiteNoiseToggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) toggleListener(whiteNoiseToggle, "white_noise")
+        }
+
+        rainfallToggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) toggleListener(rainfallToggle, "rainfall")
+        }
+
+        lightJazzToggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) toggleListener(lightJazzToggle, "light_jazz")
         }
     }
 }

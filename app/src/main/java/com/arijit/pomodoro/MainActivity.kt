@@ -26,13 +26,25 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
+import android.media.MediaPlayer
 import android.net.Uri
 import android.provider.Settings
+import android.view.View
+import com.airbnb.lottie.Lottie
+import com.airbnb.lottie.LottieAnimationView
+import androidx.core.view.isVisible
+import androidx.core.content.edit
+import java.io.File
+import android.os.Environment
 
 class MainActivity : AppCompatActivity() {
     private lateinit var settings_btn: ImageView
     private lateinit var frame_layout: FrameLayout
     private lateinit var sessionsTxt: TextView
+    private lateinit var musicBtn: ImageView
+    private lateinit var musicAnim: LottieAnimationView
+    private var mediaPlayer: MediaPlayer? = null
+    private var isMusicPlaying = false
 
     private val settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == SettingsActivity.RESULT_TIMER_SETTINGS_CHANGED) {
@@ -146,6 +158,54 @@ class MainActivity : AppCompatActivity() {
             .commit()
     }
 
+    private fun getMusicFile(musicName: String): File {
+        val musicDir = File(getExternalFilesDir(Environment.DIRECTORY_MUSIC), "pomodoro_music")
+        return File(musicDir, "${musicName}.mp3")
+    }
+
+    private fun playSelectedMusic() {
+        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        val selectedMusic = sharedPreferences.getString("selected_music", null)
+
+        if (selectedMusic != null) {
+            val musicFile = getMusicFile(selectedMusic)
+            if (musicFile.exists()) {
+                try {
+                    mediaPlayer?.release()
+                    mediaPlayer = MediaPlayer().apply {
+                        setDataSource(musicFile.absolutePath)
+                        isLooping = true
+                        prepare()
+                        start()
+                    }
+                    isMusicPlaying = true
+                    musicBtn.visibility = View.GONE
+                    musicAnim.visibility = View.VISIBLE
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    Toast.makeText(this, "Error playing audio", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(this, "Audio file not found", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "Select audio from settings", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun stopMusic() {
+        mediaPlayer?.apply {
+            if (isPlaying) {
+                stop()
+            }
+            release()
+        }
+        mediaPlayer = null
+        isMusicPlaying = false
+        musicAnim.visibility = View.GONE
+        musicBtn.visibility = View.VISIBLE
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -164,20 +224,25 @@ class MainActivity : AppCompatActivity() {
             apply()
         }
 
+        // Initialize MediaPlayer with the audio file
+        mediaPlayer = MediaPlayer.create(this, R.raw.music)
+
         // Check and request notification permission
         checkNotificationPermission()
 
         sessionsTxt = findViewById(R.id.sessions_txt)
         settings_btn = findViewById(R.id.settings_btn)
+        musicBtn = findViewById(R.id.music_btn)
+        musicAnim = findViewById(R.id.music_animated_btn)
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
 
         if (amoledMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            sharedPreferences.edit().putBoolean("darkMode", false).apply()
+            sharedPreferences.edit { putBoolean("darkMode", false) }
         } else if (darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            sharedPreferences.edit().putBoolean("amoledMode", false).apply()
+            sharedPreferences.edit { putBoolean("amoledMode", false) }
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
@@ -190,6 +255,20 @@ class MainActivity : AppCompatActivity() {
             vibrate()
             val intent = Intent(this@MainActivity, SettingsActivity::class.java)
             settingsLauncher.launch(intent)
+        }
+
+        musicBtn.setOnClickListener {
+            vibrate()
+            if (!isMusicPlaying) {
+                playSelectedMusic()
+            } else {
+                stopMusic()
+            }
+        }
+
+        musicAnim.setOnClickListener {
+            vibrate()
+            stopMusic()
         }
     }
 
@@ -260,5 +339,10 @@ class MainActivity : AppCompatActivity() {
             "ShortBreakFragment" -> setMainBackgroundForFragment("short_break")
             "LongBreakFragment" -> setMainBackgroundForFragment("long_break")
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopMusic()
     }
 }
