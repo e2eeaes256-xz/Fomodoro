@@ -22,8 +22,19 @@ import com.arijit.pomodoro.R
 import android.widget.RelativeLayout
 import android.app.NotificationManager
 import androidx.core.app.NotificationCompat
+import android.app.AlertDialog
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.arijit.pomodoro.adapters.TimerPresetAdapter
+import com.arijit.pomodoro.models.TimerPreset
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import android.widget.EditText
+import com.arijit.pomodoro.services.TimerService
+import android.content.SharedPreferences
 
 class TimerFragment : Fragment() {
+    private lateinit var focusCard: CardView
     private lateinit var minTxt: TextView
     private lateinit var secTxt: TextView
     private lateinit var playBtn: CardView
@@ -35,6 +46,7 @@ class TimerFragment : Fragment() {
     private lateinit var focusTxt: TextView
     private lateinit var sessionsTxt: TextView
     private var mediaPlayer: MediaPlayer? = null
+    private lateinit var sharedPreferences: SharedPreferences
     
     private var countDownTimer: CountDownTimer? = null
     private var timeLeftInMillis: Long = 0
@@ -46,6 +58,7 @@ class TimerFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         if (savedInstanceState != null) {
             timeLeftInMillis = savedInstanceState.getLong("timeLeftInMillis")
             timerRunning = savedInstanceState.getBoolean("timerRunning")
@@ -59,10 +72,15 @@ class TimerFragment : Fragment() {
     }
     
     private fun loadSettings() {
-        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         timeLeftInMillis = sharedPreferences.getInt("focusedTime", 25) * 60 * 1000L
         totalSessions = sharedPreferences.getInt("sessions", 4)
         autoStart = sharedPreferences.getBoolean("autoStart", false)
+        
+        // Only reset focus text if settings were modified
+        if (sharedPreferences.getBoolean("wereTimerSettingsModified", false)) {
+            sharedPreferences.edit().putString("focusText", "Focus").apply()
+            sharedPreferences.edit().putBoolean("wereTimerSettingsModified", false).apply()
+        }
     }
     
     override fun onCreateView(
@@ -70,6 +88,7 @@ class TimerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_timer, container, false)
+        focusCard = view.findViewById(R.id.focus_card)
         minTxt = view.findViewById(R.id.min_txt)
         secTxt = view.findViewById(R.id.sec_txt)
         playBtn = view.findViewById(R.id.play_btn)
@@ -81,8 +100,12 @@ class TimerFragment : Fragment() {
         brain = view.findViewById(R.id.brain)
         sessionsTxt = requireActivity().findViewById(R.id.sessions_txt)
 
-        val parentLayout = requireActivity().findViewById<android.widget.RelativeLayout>(R.id.main)
         val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        
+        // Load saved focus text after view initialization
+        focusTxt.text = sharedPreferences.getString("focusText", "Focus")
+
+        val parentLayout = requireActivity().findViewById<android.widget.RelativeLayout>(R.id.main)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
 
         if (amoledMode) {
@@ -91,6 +114,11 @@ class TimerFragment : Fragment() {
 
         updateCountdownText()
         updateSessionsText()
+
+        focusCard.setOnClickListener {
+            vibrate()
+            showPresetDialog()
+        }
         
         playBtn.setOnClickListener {
             vibrate()
@@ -126,11 +154,65 @@ class TimerFragment : Fragment() {
         return view
     }
     
+    override fun onResume() {
+        super.onResume()
+        // Notify service that app is opened
+        TimerService.appOpened(requireContext())
+        
+        // Check if timer is running in service
+        val isServiceRunning = sharedPreferences.getBoolean("timerRunning", false)
+        if (isServiceRunning) {
+            // Get the current time from service
+            timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
+            updateCountdownText()
+            timerRunning = true
+            playBtn.visibility = View.GONE
+            pauseBtn.visibility = View.VISIBLE
+            resetBtn.visibility = View.VISIBLE
+            skipBtn.visibility = View.VISIBLE
+            
+            // Only start a new timer if one isn't already running
+            if (countDownTimer == null) {
+                // Create a new timer with the current time
+                countDownTimer = object : CountDownTimer(timeLeftInMillis, 1000) {
+                    override fun onTick(millisUntilFinished: Long) {
+                        timeLeftInMillis = millisUntilFinished
+                        updateCountdownText()
+                        // Update SharedPreferences with current time
+                        sharedPreferences.edit().putLong("timeLeftInMillis", timeLeftInMillis).apply()
+                    }
+
+                    override fun onFinish() {
+                        timerRunning = false
+                        updateTimerState(false)
+                        playAlarm()
+                        if (currentSession < totalSessions) {
+                            loadShortBreakFragment()
+                        } else {
+                            Toast.makeText(requireContext(), "All sessions completed", Toast.LENGTH_SHORT).show()
+                            loadLongBreakFragment()
+                        }
+                    }
+                }.start()
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Mark that app is in background
+        sharedPreferences.edit().putBoolean("isAppInForeground", false).apply()
+    }
+
     private fun startTimer() {
+        countDownTimer?.cancel() // Cancel any existing timer
+        
         countDownTimer = object : CountDownTimer(timeLeftInMillis, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis = millisUntilFinished
                 updateCountdownText()
+                // Update SharedPreferences with current time
+                sharedPreferences.edit().putLong("timeLeftInMillis", timeLeftInMillis).apply()
             }
 
             override fun onFinish() {
@@ -152,6 +234,10 @@ class TimerFragment : Fragment() {
         pauseBtn.visibility = View.VISIBLE
         resetBtn.visibility = View.VISIBLE
         skipBtn.visibility = View.VISIBLE
+
+        // Start the foreground service
+        val sessionInfo = "$currentSession/$totalSessions"
+        TimerService.startTimer(requireContext(), "focus", sessionInfo)
     }
     
     private fun pauseTimer() {
@@ -160,6 +246,9 @@ class TimerFragment : Fragment() {
         updateTimerState(false)
         playBtn.visibility = View.VISIBLE
         pauseBtn.visibility = View.GONE
+
+        // Stop the foreground service
+        TimerService.stopTimer(requireContext())
     }
     
     private fun resetTimer() {
@@ -168,11 +257,14 @@ class TimerFragment : Fragment() {
         timerRunning = false
         updateTimerState(false)
         updateCountdownText()
-        
+
         playBtn.visibility = View.VISIBLE
         pauseBtn.visibility = View.GONE
         resetBtn.visibility = View.GONE
         skipBtn.visibility = View.GONE
+
+        // Stop the foreground service
+        TimerService.stopTimer(requireContext())
     }
     
     private fun updateCountdownText() {
@@ -302,6 +394,179 @@ class TimerFragment : Fragment() {
         outState.putInt("totalSessions", totalSessions)
         outState.putBoolean("autoStart", autoStart)
         outState.putBoolean("isFromShortBreak", isFromShortBreak)
+    }
+
+    private fun showPresetDialog() {
+        val inflater = LayoutInflater.from(context)
+        val presetView = inflater.inflate(R.layout.preset_layout, null)
+        val presetRecyclerView = presetView.findViewById<RecyclerView>(R.id.preset_rv)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(presetView)
+            .create()
+        
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        
+        // Set up RecyclerView
+        presetRecyclerView.layoutManager = LinearLayoutManager(context)
+        
+        // Load presets from SharedPreferences
+        val presets = loadPresets().toMutableList()
+        
+        val adapter = TimerPresetAdapter(presets) { preset ->
+            vibrate()
+            // Stop any running timer
+            if (timerRunning) {
+                pauseTimer()
+            }
+            
+            // Update all timer durations in SharedPreferences
+            val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+            sharedPreferences.edit().apply {
+                putInt("focusedTime", preset.focusMinutes)
+                putInt("shortBreak", preset.shortBreakMinutes)
+                putInt("longBreak", preset.longBreakMinutes)
+                putString("focusText", preset.name)
+                apply()
+            }
+            
+            // Update current timer
+            timeLeftInMillis = preset.focusMinutes * 60 * 1000L
+            updateCountdownText()
+            focusTxt.text = preset.name
+            
+            // Reset timer state
+            playBtn.visibility = View.VISIBLE
+            pauseBtn.visibility = View.GONE
+            resetBtn.visibility = View.GONE
+            skipBtn.visibility = View.GONE
+            
+            dialog.dismiss()
+        }
+
+        // Add long press listener for deletion
+        adapter.setOnLongClickListener { preset ->
+            showDeleteConfirmationDialog(preset) {
+                // Refresh the RecyclerView after deletion
+                val updatedPresets = loadPresets()
+                adapter.updatePresets(updatedPresets)
+            }
+            true
+        }
+        
+        presetRecyclerView.adapter = adapter
+        
+        // Handle add new timer button click
+        presetView.findViewById<CardView>(R.id.add_new_timer_btn).setOnClickListener {
+            vibrate()
+            dialog.dismiss()
+            showAddTimerDialog {
+                // Refresh the RecyclerView after adding new preset
+                val updatedPresets = loadPresets()
+                adapter.updatePresets(updatedPresets)
+            }
+        }
+        
+        dialog.show()
+    }
+
+    private fun showAddTimerDialog(onPresetAdded: () -> Unit) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_add_timer, null)
+        val nameInput = dialogView.findViewById<EditText>(R.id.timer_name_input)
+        val durationInput = dialogView.findViewById<EditText>(R.id.timer_duration_input)
+        val shortBreakInput = dialogView.findViewById<EditText>(R.id.short_break_input)
+        val longBreakInput = dialogView.findViewById<EditText>(R.id.long_break_input)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle("Add New Timer")
+            .setView(dialogView)
+            .setPositiveButton("Add") { _, _ ->
+                val name = nameInput.text.toString()
+                val duration = durationInput.text.toString().toIntOrNull()
+                val shortBreak = shortBreakInput.text.toString().toIntOrNull()
+                val longBreak = longBreakInput.text.toString().toIntOrNull()
+
+                if (name.isNotEmpty() && duration != null && shortBreak != null && longBreak != null) {
+                    val newPreset = TimerPreset(name, duration, shortBreak, longBreak)
+                    savePreset(newPreset)
+                    onPresetAdded()
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
+    private fun showDeleteConfirmationDialog(preset: TimerPreset, onPresetDeleted: () -> Unit) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete Timer")
+            .setMessage("Are you sure you want to delete ${preset.name}?")
+            .setPositiveButton("Delete") { _, _ ->
+                deletePreset(preset)
+                onPresetDeleted()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun loadPresets(): List<TimerPreset> {
+        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        val presetsJson = sharedPreferences.getString("timer_presets", null)
+        
+        // If no presets are saved, initialize with default presets
+        if (presetsJson == null) {
+            val defaultPresets = listOf(
+                TimerPreset("Pomodoro", 25, 5, 15),
+                TimerPreset("Quick Focus", 15, 3, 10),
+                TimerPreset("Deep Work", 45, 10, 20),
+                TimerPreset("Study Session", 30, 5, 15)
+            )
+            sharedPreferences.edit().putString("timer_presets", Gson().toJson(defaultPresets)).apply()
+            return defaultPresets
+        }
+        
+        val type = object : TypeToken<List<TimerPreset>>() {}.type
+        return Gson().fromJson(presetsJson, type) ?: emptyList()
+    }
+
+    private fun savePreset(preset: TimerPreset) {
+        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        val presetsJson = sharedPreferences.getString("timer_presets", "[]")
+        val type = object : TypeToken<List<TimerPreset>>() {}.type
+        val presets = Gson().fromJson<List<TimerPreset>>(presetsJson, type).toMutableList()
+        
+        presets.add(preset)
+        
+        sharedPreferences.edit().putString("timer_presets", Gson().toJson(presets)).apply()
+    }
+
+    private fun deletePreset(preset: TimerPreset) {
+        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        val presetsJson = sharedPreferences.getString("timer_presets", "[]")
+        val type = object : TypeToken<List<TimerPreset>>() {}.type
+        val presets = Gson().fromJson<List<TimerPreset>>(presetsJson, type).toMutableList()
+        
+        // Check if the preset being deleted is the currently selected one
+        val currentFocusText = sharedPreferences.getString("focusText", "Focus")
+        if (currentFocusText == preset.name) {
+            // Reset to default values
+            sharedPreferences.edit().apply {
+                putInt("focusedTime", 25)
+                putInt("shortBreak", 5)
+                putInt("longBreak", 15)
+                putString("focusText", "Focus")
+                apply()
+            }
+            
+            // Update current timer display
+            timeLeftInMillis = 25 * 60 * 1000L
+            updateCountdownText()
+            focusTxt.text = "Focus"
+        }
+        
+        presets.removeAll { it.name == preset.name }
+        sharedPreferences.edit().putString("timer_presets", Gson().toJson(presets)).apply()
     }
 
     companion object {

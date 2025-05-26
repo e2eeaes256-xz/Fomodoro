@@ -36,6 +36,8 @@ import androidx.core.view.isVisible
 import androidx.core.content.edit
 import java.io.File
 import android.os.Environment
+import com.arijit.pomodoro.fragments.LongBreakFragment
+import com.arijit.pomodoro.fragments.ShortBreakFragment
 
 class MainActivity : AppCompatActivity() {
     private lateinit var settings_btn: ImageView
@@ -216,12 +218,51 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // Reset timer state flags when app starts
-        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
-        sharedPreferences.edit().apply {
-            putBoolean("isTimerRunning", false)
-            putBoolean("isBreakActive", false)
-            apply()
+        // Check if we need to restore a specific fragment from notification
+        val fragmentType = intent.getStringExtra("fragmentType")
+        val sessionInfo = intent.getStringExtra("sessionInfo")
+        
+        if (fragmentType != null && sessionInfo != null) {
+            when (fragmentType) {
+                "focus" -> {
+                    val sessionParts = sessionInfo.split("/")
+                    if (sessionParts.size == 2) {
+                        val currentSession = sessionParts[0].toIntOrNull() ?: 1
+                        val totalSessions = sessionParts[1].toIntOrNull() ?: 4
+                        val fragment = TimerFragment.newInstance(currentSession, totalSessions, false)
+                        supportFragmentManager.beginTransaction()
+                            .replace(R.id.frame_layout, fragment)
+                            .commit()
+                    }
+                }
+                "shortBreak" -> {
+                    val fragment = ShortBreakFragment()
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.frame_layout, fragment)
+                        .commit()
+                }
+                "longBreak" -> {
+                    val fragment = LongBreakFragment()
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.frame_layout, fragment)
+                        .commit()
+                }
+            }
+        } else {
+            // Normal app start
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.frame_layout, TimerFragment())
+                .commit()
+        }
+
+        // Only reset timer state flags if this is a fresh app start (not from notification)
+        if (fragmentType == null) {
+            val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+            sharedPreferences.edit().apply {
+                putBoolean("isTimerRunning", false)
+                putBoolean("isBreakActive", false)
+                apply()
+            }
         }
 
         // Initialize MediaPlayer with the audio file
@@ -234,6 +275,7 @@ class MainActivity : AppCompatActivity() {
         settings_btn = findViewById(R.id.settings_btn)
         musicBtn = findViewById(R.id.music_btn)
         musicAnim = findViewById(R.id.music_animated_btn)
+        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
 
@@ -245,10 +287,6 @@ class MainActivity : AppCompatActivity() {
             sharedPreferences.edit { putBoolean("amoledMode", false) }
         } else {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
-
-        if (savedInstanceState == null) {
-            showTimerFragment()
         }
 
         settings_btn.setOnClickListener {

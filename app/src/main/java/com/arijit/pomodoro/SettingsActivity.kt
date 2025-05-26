@@ -79,8 +79,10 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var whiteNoiseToggle: MaterialSwitch
     private lateinit var rainfallToggle: MaterialSwitch
     private lateinit var lightJazzToggle: MaterialSwitch
+    private lateinit var keepScreenAwakeToggle: MaterialSwitch
     private val CHANNEL_ID = "download_channel"
     private val NOTIFICATION_ID = 1
+    private var wakeLock: android.os.PowerManager.WakeLock? = null
 
     private var isUpdatingSlider = false
 
@@ -185,6 +187,7 @@ class SettingsActivity : AppCompatActivity() {
         whiteNoiseToggle = findViewById(R.id.white_noise_toggle)
         rainfallToggle = findViewById(R.id.rainfall_toggle)
         lightJazzToggle = findViewById(R.id.light_jazz_toggle)
+        keepScreenAwakeToggle = findViewById(R.id.keep_screen_awake_toggle)
     }
 
     private fun loadSavedSettings() {
@@ -198,6 +201,9 @@ class SettingsActivity : AppCompatActivity() {
         darkModeToggle.isChecked = darkMode
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
         amoledToggle.isChecked = amoledMode
+        val keepScreenAwake = sharedPreferences.getBoolean("keepScreenAwake", false)
+        keepScreenAwakeToggle.isChecked = keepScreenAwake
+        updateWakeLock(keepScreenAwake)
 
         updateTexts()
     }
@@ -403,10 +409,19 @@ class SettingsActivity : AppCompatActivity() {
             intent.data = android.net.Uri.parse("https://ko-fi.com/arijitroy05/goal?g=0")
             startActivity(intent)
         }
+
+        keepScreenAwakeToggle.setOnCheckedChangeListener { _, isChecked ->
+            sharedPreferences.edit().putBoolean("keepScreenAwake", isChecked).apply()
+            updateWakeLock(isChecked)
+        }
     }
 
     private fun markTimerSettingsModified() {
-        sharedPreferences.edit().putBoolean("wereTimerSettingsModified", true).apply()
+        sharedPreferences.edit().apply {
+            putBoolean("wereTimerSettingsModified", true)
+            putString("focusText", "Focus")  // Reset focus text when any setting is modified
+            apply()
+        }
     }
 
     private fun updateTexts() {
@@ -426,6 +441,8 @@ class SettingsActivity : AppCompatActivity() {
             putInt("sessions", sessionsSlider.value.toInt())
             putInt("alarmDuration", alarmSlider.value.toInt())
             putBoolean("autoStart", autoStartSessions.isChecked)
+            putString("focusText", "Focus")  // Reset focus text when settings are changed
+            putBoolean("wereTimerSettingsModified", true)
             apply()
         }
     }
@@ -602,5 +619,28 @@ class SettingsActivity : AppCompatActivity() {
         lightJazzToggle.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) toggleListener(lightJazzToggle, "light_jazz")
         }
+    }
+
+    private fun updateWakeLock(enable: Boolean) {
+        if (enable) {
+            if (wakeLock == null) {
+                val powerManager = getSystemService(Context.POWER_SERVICE) as android.os.PowerManager
+                wakeLock = powerManager.newWakeLock(
+                    android.os.PowerManager.SCREEN_BRIGHT_WAKE_LOCK or
+                    android.os.PowerManager.ON_AFTER_RELEASE,
+                    "MinimalPomodoro::ScreenWakeLock"
+                )
+                wakeLock?.acquire(10*60*1000L /*10 minutes*/)
+            }
+        } else {
+            wakeLock?.release()
+            wakeLock = null
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        wakeLock?.release()
+        wakeLock = null
     }
 }

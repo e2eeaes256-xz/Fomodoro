@@ -604,6 +604,44 @@
 
             </androidx.cardview.widget.CardView>
 
+            <!-- KEEP SCREEN AWAKE CARD -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/keep_screen_awake_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:cardCornerRadius="20dp">
+
+                <RelativeLayout
+                    android:id="@+id/keep_screen_awake_card_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/white"
+                    android:padding="15dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:fontFamily="@font/montserrat_bold"
+                        android:text="Keep screen awake"
+                        android:textColor="@color/black"
+                        android:textSize="18sp" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/keep_screen_awake_toggle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="15dp"
+                        android:layout_alignParentEnd="true"
+                        app:thumbTint="@color/white"
+                        app:trackTint="@color/switch_track_tint_dark"
+                        tools:ignore="UseSwitchCompatOrMaterialXml" />
+
+                </RelativeLayout>
+
+            </androidx.cardview.widget.CardView>
+
             <!-- BLANK SPACE -->
             <RelativeLayout
                 android:layout_width="match_parent"

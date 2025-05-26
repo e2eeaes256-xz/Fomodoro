@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat
 import com.arijit.pomodoro.R
 import android.app.NotificationManager
 import androidx.core.app.NotificationCompat
+import android.content.Intent
 
 class ShortBreakFragment : Fragment() {
     private lateinit var backToTimer: TextView
@@ -205,7 +206,7 @@ class ShortBreakFragment : Fragment() {
         timerRunning = false
         updateBreakState(false)
         updateCountdownText()
-        
+
         playBtn.visibility = View.VISIBLE
         pauseBtn.visibility = View.GONE
         resetBtn.visibility = View.GONE

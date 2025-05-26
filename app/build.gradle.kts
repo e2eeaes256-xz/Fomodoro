@@ -11,8 +11,8 @@ android {
         applicationId = "com.arijit.pomodoro"
         minSdk = 24
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.5"
+        versionCode = 6
+        versionName = "1.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -50,4 +50,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("com.airbnb.android:lottie:6.6.0")
+    implementation ("com.google.code.gson:gson:2.10.1")
 }
