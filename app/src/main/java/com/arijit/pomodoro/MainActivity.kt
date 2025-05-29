@@ -236,7 +236,33 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        
+        // Initialize theme before setting content view
+        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        val darkMode = sharedPreferences.getBoolean("darkMode", false)
+        val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
+        
+        // Set theme mode only once
+        when {
+            amoledMode -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                sharedPreferences.edit().apply {
+                    putBoolean("darkMode", false)
+                    apply()
+                }
+            }
+            darkMode -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                sharedPreferences.edit().apply {
+                    putBoolean("amoledMode", false)
+                    apply()
+                }
+            }
+            else -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+        }
+        
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -294,18 +320,6 @@ class MainActivity : AppCompatActivity() {
         settings_btn = findViewById(R.id.settings_btn)
         musicBtn = findViewById(R.id.music_btn)
         musicAnim = findViewById(R.id.music_animated_btn)
-        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
-        val darkMode = sharedPreferences.getBoolean("darkMode", false)
-        val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
-
-        // Apply theme based on preferences
-        if (amoledMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            sharedPreferences.edit { putBoolean("darkMode", false) }
-        } else if (darkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            sharedPreferences.edit { putBoolean("amoledMode", false) }
-        }
 
         settings_btn.setOnClickListener {
             vibrate()
@@ -330,6 +344,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
+        // Ignore system theme changes
         val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
@@ -340,6 +355,8 @@ class MainActivity : AppCompatActivity() {
         } else if (darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             sharedPreferences.edit().putBoolean("amoledMode", false).apply()
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
 

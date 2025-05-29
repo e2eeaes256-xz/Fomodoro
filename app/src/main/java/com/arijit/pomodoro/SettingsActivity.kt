@@ -100,8 +100,34 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Set light mode by default
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        
+        // Initialize sharedPreferences first
+        sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        
+        // Initialize theme before setting content view
+        val darkMode = sharedPreferences.getBoolean("darkMode", false)
+        val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
+        
+        // Set theme mode only once
+        when {
+            amoledMode -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                sharedPreferences.edit().apply {
+                    putBoolean("darkMode", false)
+                    apply()
+                }
+            }
+            darkMode -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                sharedPreferences.edit().apply {
+                    putBoolean("amoledMode", false)
+                    apply()
+                }
+            }
+            else -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+        }
         
         enableEdgeToEdge()
         setContentView(R.layout.activity_settings)
@@ -111,7 +137,6 @@ class SettingsActivity : AppCompatActivity() {
             insets
         }
 
-        sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         initializeViews()
         loadSavedSettings()
         setupListeners()
@@ -124,18 +149,28 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        // Remove system theme handling, only use app preferences
+        // Ignore system theme changes
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
         
-        if (amoledMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            sharedPreferences.edit().putBoolean("darkMode", false).apply()
-        } else if (darkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            sharedPreferences.edit().putBoolean("amoledMode", false).apply()
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        when {
+            amoledMode -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                sharedPreferences.edit().apply {
+                    putBoolean("darkMode", false)
+                    apply()
+                }
+            }
+            darkMode -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                sharedPreferences.edit().apply {
+                    putBoolean("amoledMode", false)
+                    apply()
+                }
+            }
+            else -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
         }
         applyTheme()
     }
@@ -381,10 +416,11 @@ class SettingsActivity : AppCompatActivity() {
                     putBoolean("amoledMode", false)
                     apply()
                 }
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             } else {
                 sharedPreferences.edit().putBoolean("darkMode", false).apply()
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
-            AppCompatDelegate.setDefaultNightMode(if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
             applyTheme()
         }
 
@@ -396,10 +432,11 @@ class SettingsActivity : AppCompatActivity() {
                     putBoolean("darkMode", false)
                     apply()
                 }
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             } else {
                 sharedPreferences.edit().putBoolean("amoledMode", false).apply()
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
-            AppCompatDelegate.setDefaultNightMode(if (isChecked) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
             applyTheme()
         }
 
