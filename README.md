@@ -2,6 +2,9 @@
 
 Fomodoro is a simple, customizable Pomodoro timer Android app designed to help you focus and manage your work/break sessions efficiently. The app features a clean UI, dark mode, AMOLED mode, and flexible session settings.
 
+## Update
+I'm having my sem exams right now... If you have any complaints or want extra features in the app, mention them in the issues section and I'll be working on them as soon as my exam ends. Thank you!
+
 ## Features
 
 - Pomodoro timer with customizable focus, short break, and long break durations
