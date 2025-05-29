@@ -100,6 +100,9 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Set light mode by default
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        
         enableEdgeToEdge()
         setContentView(R.layout.activity_settings)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -121,13 +124,20 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        if (amoledToggle.isChecked) {
-            val isNightMode = newConfig.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-            darkModeToggle.isChecked = isNightMode
-            sharedPreferences.edit().putBoolean("darkMode", isNightMode).apply()
-            AppCompatDelegate.setDefaultNightMode(if (isNightMode) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
-            applyTheme()
+        // Remove system theme handling, only use app preferences
+        val darkMode = sharedPreferences.getBoolean("darkMode", false)
+        val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
+        
+        if (amoledMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            sharedPreferences.edit().putBoolean("darkMode", false).apply()
+        } else if (darkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            sharedPreferences.edit().putBoolean("amoledMode", false).apply()
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
+        applyTheme()
     }
 
     private fun checkTimerState() {
