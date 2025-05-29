@@ -10,7 +10,6 @@ import android.os.Vibrator
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresPermission
@@ -26,10 +25,8 @@ import android.content.res.Configuration
 import androidx.activity.result.contract.ActivityResultContracts
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.Notification
 import android.content.pm.PackageManager
 import android.os.Environment
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
@@ -80,6 +77,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var rainfallToggle: MaterialSwitch
     private lateinit var lightJazzToggle: MaterialSwitch
     private lateinit var keepScreenAwakeToggle: MaterialSwitch
+    private lateinit var hapticFeedbackToggle: MaterialSwitch
     private val CHANNEL_ID = "download_channel"
     private val NOTIFICATION_ID = 1
     private var wakeLock: android.os.PowerManager.WakeLock? = null
@@ -188,6 +186,7 @@ class SettingsActivity : AppCompatActivity() {
         rainfallToggle = findViewById(R.id.rainfall_toggle)
         lightJazzToggle = findViewById(R.id.light_jazz_toggle)
         keepScreenAwakeToggle = findViewById(R.id.keep_screen_awake_toggle)
+        hapticFeedbackToggle = findViewById(R.id.haptic_feedback_toggle)
     }
 
     private fun loadSavedSettings() {
@@ -204,7 +203,7 @@ class SettingsActivity : AppCompatActivity() {
         val keepScreenAwake = sharedPreferences.getBoolean("keepScreenAwake", false)
         keepScreenAwakeToggle.isChecked = keepScreenAwake
         updateWakeLock(keepScreenAwake)
-
+        hapticFeedbackToggle.isChecked = sharedPreferences.getBoolean("hapticFeedback", true)
         updateTexts()
     }
 
@@ -217,8 +216,6 @@ class SettingsActivity : AppCompatActivity() {
             mainLayout.setBackgroundColor(resources.getColor(android.R.color.black))
         } else if (darkMode) {
             mainLayout.setBackgroundColor(resources.getColor(R.color.dark_background))
-        } else {
-            mainLayout.setBackgroundColor(resources.getColor(R.color.offwhite))
         }
     }
 
@@ -414,6 +411,10 @@ class SettingsActivity : AppCompatActivity() {
             sharedPreferences.edit().putBoolean("keepScreenAwake", isChecked).apply()
             updateWakeLock(isChecked)
         }
+
+        hapticFeedbackToggle.setOnCheckedChangeListener { _, isChecked ->
+            sharedPreferences.edit().putBoolean("hapticFeedback", isChecked).apply()
+        }
     }
 
     private fun markTimerSettingsModified() {
@@ -441,6 +442,7 @@ class SettingsActivity : AppCompatActivity() {
             putInt("sessions", sessionsSlider.value.toInt())
             putInt("alarmDuration", alarmSlider.value.toInt())
             putBoolean("autoStart", autoStartSessions.isChecked)
+            putBoolean("hapticFeedback", hapticFeedbackToggle.isChecked)
             putString("focusText", "Focus")  // Reset focus text when settings are changed
             putBoolean("wereTimerSettingsModified", true)
             apply()
@@ -449,6 +451,8 @@ class SettingsActivity : AppCompatActivity() {
 
     @RequiresPermission(Manifest.permission.VIBRATE)
     private fun vibrate() {
+        if (!hapticFeedbackToggle.isChecked) return // Don't vibrate if haptic feedback is disabled
+        
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (vibrator.hasVibrator()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

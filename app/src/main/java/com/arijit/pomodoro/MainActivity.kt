@@ -38,6 +38,7 @@ import java.io.File
 import android.os.Environment
 import com.arijit.pomodoro.fragments.LongBreakFragment
 import com.arijit.pomodoro.fragments.ShortBreakFragment
+import com.arijit.pomodoro.services.TimerService
 
 class MainActivity : AppCompatActivity() {
     private lateinit var settings_btn: ImageView
@@ -93,18 +94,43 @@ class MainActivity : AppCompatActivity() {
                     this,
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED -> {
-                    // Permission is granted, create notification channel
                     createNotificationChannel()
                 }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    showNotificationPermissionRationale()
+                }
                 else -> {
-                    // Request the permission directly
                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             }
         } else {
-            // For Android versions below 13, create notification channel directly
             createNotificationChannel()
         }
+    }
+
+    private fun showNotificationPermissionRationale() {
+        AlertDialog.Builder(this)
+            .setTitle("Notification Permission Required")
+            .setMessage("This app needs notification permission to alert you when timers complete. Please grant the permission to continue.")
+            .setPositiveButton("Grant Permission") { _, _ ->
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            .setNegativeButton("Not Now") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun showNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED) {
+                return
+            }
+        }
+        // Show notification code here
     }
 
     private fun createNotificationChannel() {
@@ -248,21 +274,13 @@ class MainActivity : AppCompatActivity() {
                         .commit()
                 }
             }
+            // Notify service that app is opened
+            TimerService.appOpened(this)
         } else {
             // Normal app start
             supportFragmentManager.beginTransaction()
                 .replace(R.id.frame_layout, TimerFragment())
                 .commit()
-        }
-
-        // Only reset timer state flags if this is a fresh app start (not from notification)
-        if (fragmentType == null) {
-            val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
-            sharedPreferences.edit().apply {
-                putBoolean("isTimerRunning", false)
-                putBoolean("isBreakActive", false)
-                apply()
-            }
         }
 
         // Initialize MediaPlayer with the audio file
@@ -285,8 +303,6 @@ class MainActivity : AppCompatActivity() {
         } else if (darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             sharedPreferences.edit { putBoolean("amoledMode", false) }
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
 
         settings_btn.setOnClickListener {
@@ -312,7 +328,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        // Update theme when configuration changes
         val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
@@ -323,14 +338,11 @@ class MainActivity : AppCompatActivity() {
         } else if (darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             sharedPreferences.edit().putBoolean("amoledMode", false).apply()
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
 
     override fun onResume() {
         super.onResume()
-        // Update theme when returning from settings
         val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
@@ -341,13 +353,14 @@ class MainActivity : AppCompatActivity() {
         } else if (darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             sharedPreferences.edit().putBoolean("amoledMode", false).apply()
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
 
     @RequiresPermission(Manifest.permission.VIBRATE)
     private fun vibrate() {
+        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        if (!sharedPreferences.getBoolean("hapticFeedback", true)) return // Don't vibrate if haptic feedback is disabled
+        
         val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (vibrator.hasVibrator()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

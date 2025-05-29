@@ -227,6 +227,9 @@ class ShortBreakFragment : Fragment() {
 
     @RequiresPermission(Manifest.permission.VIBRATE)
     private fun vibrate() {
+        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        if (!sharedPreferences.getBoolean("hapticFeedback", true)) return // Don't vibrate if haptic feedback is disabled
+        
         val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (vibrator.hasVibrator()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -65,24 +65,29 @@ class TimerService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
-            ACTION_START_TIMER -> {
-                val fragmentType = intent.getStringExtra(EXTRA_FRAGMENT_TYPE) ?: "focus"
-                val sessionInfo = intent.getStringExtra(EXTRA_SESSION_INFO) ?: ""
-                startService(fragmentType, sessionInfo)
+        try {
+            when (intent?.action) {
+                ACTION_START_TIMER -> {
+                    val fragmentType = intent.getStringExtra(EXTRA_FRAGMENT_TYPE) ?: "focus"
+                    val sessionInfo = intent.getStringExtra(EXTRA_SESSION_INFO) ?: ""
+                    startService(fragmentType, sessionInfo)
+                }
+                ACTION_STOP_TIMER -> {
+                    stopService()
+                }
+                ACTION_APP_OPENED -> {
+                    // Mark that app is in foreground
+                    sharedPreferences.edit().putBoolean("isAppInForeground", true).apply()
+                    // Keep service running but update notification
+                    val fragmentType = sharedPreferences.getString("currentFragment", "focus") ?: "focus"
+                    val sessionInfo = sharedPreferences.getString("sessionInfo", "") ?: ""
+                    updateNotification()
+                }
             }
-            ACTION_STOP_TIMER -> {
-                stopService()
-            }
-            ACTION_APP_OPENED -> {
-                // Mark that app is in foreground
-                sharedPreferences.edit().putBoolean("isAppInForeground", true).apply()
-                // Dismiss notification but keep service running
-                stopForeground(STOP_FOREGROUND_REMOVE)
-                // Remove the notification
-                val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.cancel(NOTIFICATION_ID)
-            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            stopSelf()
+            return START_NOT_STICKY
         }
         return START_STICKY
     }

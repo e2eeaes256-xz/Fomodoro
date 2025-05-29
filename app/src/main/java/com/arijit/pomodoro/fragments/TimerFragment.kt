@@ -149,6 +149,13 @@ class TimerFragment : Fragment() {
             startTimer()
         } else if (autoStart && isFromShortBreak) {
             startTimer()
+        } else {
+            // Ensure timer is stopped and UI is in initial state
+            playBtn.visibility = View.VISIBLE
+            pauseBtn.visibility = View.GONE
+            resetBtn.visibility = View.GONE
+            skipBtn.visibility = View.GONE
+            updateCountdownText()
         }
 
         return view
@@ -173,27 +180,7 @@ class TimerFragment : Fragment() {
             
             // Only start a new timer if one isn't already running
             if (countDownTimer == null) {
-                // Create a new timer with the current time
-                countDownTimer = object : CountDownTimer(timeLeftInMillis, 1000) {
-                    override fun onTick(millisUntilFinished: Long) {
-                        timeLeftInMillis = millisUntilFinished
-                        updateCountdownText()
-                        // Update SharedPreferences with current time
-                        sharedPreferences.edit().putLong("timeLeftInMillis", timeLeftInMillis).apply()
-                    }
-
-                    override fun onFinish() {
-                        timerRunning = false
-                        updateTimerState(false)
-                        playAlarm()
-                        if (currentSession < totalSessions) {
-                            loadShortBreakFragment()
-                        } else {
-                            Toast.makeText(requireContext(), "All sessions completed", Toast.LENGTH_SHORT).show()
-                            loadLongBreakFragment()
-                        }
-                    }
-                }.start()
+                startTimer()
             }
         }
     }
@@ -281,6 +268,9 @@ class TimerFragment : Fragment() {
 
     @RequiresPermission(Manifest.permission.VIBRATE)
     private fun vibrate() {
+        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        if (!sharedPreferences.getBoolean("hapticFeedback", true)) return // Don't vibrate if haptic feedback is disabled
+        
         val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         if (vibrator.hasVibrator()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

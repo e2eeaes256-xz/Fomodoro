@@ -4,6 +4,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="offwhite">#F2EAE4</color>
 
+    <color name="red_nothing">#d71923</color>
+    <color name="green_nothing">#27C300</color>
+    <color name="blue_nothing">#2DA8F8</color>
+
     <color name="light_red">#fff2f2</color>
     <color name="medium_red">#ff7c7c</color>
     <color name="deep_red">#471515</color>
