@@ -13,6 +13,8 @@ I'm having my sem exams right now... If you have any complaints or want extra fe
 - Dark mode and AMOLED mode support
 - Simple, distraction-free interface
 - Vibration feedback for button actions
+- Ambient background music for ultimate focus sessions
+- Custom timer presets
 - Easy access to settings and GitHub repository
 
 ## Screenshots
