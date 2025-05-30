@@ -20,7 +20,10 @@ class TimerService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
         override fun run() {
-            updateNotification()
+            // Only update notification if app is in background
+            if (!sharedPreferences.getBoolean("isAppInForeground", true)) {
+                updateNotification()
+            }
             handler.postDelayed(this, 1000)
         }
     }
@@ -117,9 +120,11 @@ class TimerService : Service() {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "Timer Service",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_LOW
             ).apply {
                 description = "Shows ongoing timer status"
+                enableVibration(false)
+                setSound(null, null)
             }
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(channel)
@@ -158,7 +163,8 @@ class TimerService : Service() {
             .setSmallIcon(R.drawable.brain)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setSilent(true)
             .build()
     }
 
