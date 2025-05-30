@@ -157,8 +157,9 @@ class ShortBreakFragment : Fragment() {
             parentLayout.setBackgroundResource(R.color.light_red)
         }
         
-        val nextSession = if (currentSession < totalSessions) currentSession + 1 else 1
-        val fragment = TimerFragment.newInstance(nextSession, totalSessions, autoStart, true)
+        // Only increment session if we're not manually going back
+        val nextSession = if (isFromTimer) currentSession + 1 else currentSession
+        val fragment = TimerFragment.newInstance(nextSession, totalSessions, autoStart, false)
         parentFragmentManager.beginTransaction()
             .replace(R.id.frame_layout, fragment)
             .commit()
