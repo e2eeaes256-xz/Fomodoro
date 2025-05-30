@@ -450,7 +450,7 @@ class SettingsActivity : AppCompatActivity() {
         supportCard.setOnClickListener {
             vibrate()
             val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
-            intent.data = android.net.Uri.parse("https://ko-fi.com/arijitroy05/goal?g=0")
+            intent.data = android.net.Uri.parse("https://arijit-05.github.io/website/")
             startActivity(intent)
         }
 
