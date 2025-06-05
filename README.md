@@ -31,8 +31,8 @@ I'm having my sem exams right now... If you have any complaints or want extra fe
     <td><img src="https://github.com/user-attachments/assets/a9f1333b-eb10-4eca-9e13-a8ccf4989cd3" width="200"/></td>
   </tr>
   <tr>
-    <td><img src="https://github.com/user-attachments/assets/28147867-1bf7-4b93-b836-93f9f85d118c" width="200"/></td>
     <td><img src="https://github.com/user-attachments/assets/7a3145a6-3fa2-4e10-b58b-05e008f7b094" width="200"/></td>
+    <td><img src="https://github.com/user-attachments/assets/a62d6c43-ef11-448c-8d9e-091fcbedb7ba" width="200"/></td>
     <td><img src="https://github.com/user-attachments/assets/122ba9da-6179-4c21-a656-c427d461e9c0" width="200"/></td>
   </tr>
 </table>
