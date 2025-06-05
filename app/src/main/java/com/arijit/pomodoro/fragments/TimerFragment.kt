@@ -32,6 +32,7 @@ import com.google.gson.reflect.TypeToken
 import android.widget.EditText
 import com.arijit.pomodoro.services.TimerService
 import android.content.SharedPreferences
+import com.arijit.pomodoro.utils.StatsManager
 
 class TimerFragment : Fragment() {
     private lateinit var focusCard: CardView
@@ -47,6 +48,7 @@ class TimerFragment : Fragment() {
     private lateinit var sessionsTxt: TextView
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var statsManager: StatsManager
     
     private var countDownTimer: CountDownTimer? = null
     private var timeLeftInMillis: Long = 0
@@ -59,6 +61,7 @@ class TimerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        statsManager = StatsManager(requireContext())
         if (savedInstanceState != null) {
             timeLeftInMillis = savedInstanceState.getLong("timeLeftInMillis")
             timerRunning = savedInstanceState.getBoolean("timerRunning")
@@ -206,6 +209,11 @@ class TimerFragment : Fragment() {
                 timerRunning = false
                 updateTimerState(false)
                 playAlarm()
+                
+                // Update stats when timer completes
+                val focusMinutes = (sharedPreferences.getInt("focusedTime", 25))
+                statsManager.updateStats(focusMinutes)
+                
                 if (currentSession < totalSessions) {
                     loadShortBreakFragment()
                 } else {

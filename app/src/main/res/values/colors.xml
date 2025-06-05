@@ -11,6 +11,7 @@
     <color name="light_red">#fff2f2</color>
     <color name="medium_red">#ff7c7c</color>
     <color name="deep_red">#471515</color>
+    <color name="alt_light_red">#FFBBBB</color>
 
     <color name="light_green">#f2fff5</color>
     <color name="medium_green">#8ce8a1</color>

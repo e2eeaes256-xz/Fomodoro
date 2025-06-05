@@ -25,8 +25,10 @@ import android.content.res.Configuration
 import androidx.activity.result.contract.ActivityResultContracts
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Environment
+import androidx.cardview.widget.CardView
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.CoroutineScope
@@ -62,22 +64,13 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var madeWithLoveTxt: TextView
     private lateinit var uiSettingsComponents: LinearLayout
     private lateinit var timerSettingsComponents: LinearLayout
-    private lateinit var ri: TextView
-    private lateinit var a: TextView
-    private lateinit var ft: TextView
-    private lateinit var sb: TextView
-    private lateinit var lb: TextView
-    private lateinit var s: TextView
-    private lateinit var ass: TextView
-    private lateinit var dm: TextView
-    private lateinit var am: TextView
-    private lateinit var gr: TextView
     private lateinit var brownNoiseToggle: MaterialSwitch
     private lateinit var whiteNoiseToggle: MaterialSwitch
     private lateinit var rainfallToggle: MaterialSwitch
     private lateinit var lightJazzToggle: MaterialSwitch
     private lateinit var keepScreenAwakeToggle: MaterialSwitch
     private lateinit var hapticFeedbackToggle: MaterialSwitch
+    private lateinit var statsCard: CardView
     private val CHANNEL_ID = "download_channel"
     private val NOTIFICATION_ID = 1
     private var wakeLock: android.os.PowerManager.WakeLock? = null
@@ -145,6 +138,11 @@ class SettingsActivity : AppCompatActivity() {
         createNotificationChannel()
         initializeMusicToggles()
         setupMusicToggleListeners()
+
+        statsCard.setOnClickListener {
+            vibrate()
+            startActivity(Intent(this@SettingsActivity, StatsActivity::class.java))
+        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -214,16 +212,6 @@ class SettingsActivity : AppCompatActivity() {
         runningTimerTxt = findViewById(R.id.running_timer_txt)
         madeWithLoveTxt = findViewById(R.id.made_with_love_txt)
         aboutTheAppTxt = findViewById(R.id.about_the_app_txt)
-        ft = findViewById(R.id.ft)
-        sb = findViewById(R.id.sb)
-        lb = findViewById(R.id.lb)
-        s = findViewById(R.id.s)
-        ass = findViewById(R.id.ass)
-        dm = findViewById(R.id.dm)
-        am = findViewById(R.id.am)
-        gr = findViewById(R.id.gr)
-        ri = findViewById(R.id.ri)
-        a = findViewById(R.id.a)
         uiSettingsComponents = findViewById(R.id.ui_settings_components)
         timerSettingsComponents = findViewById(R.id.timer_settings_components)
         brownNoiseToggle = findViewById(R.id.brown_noise_toggle)
@@ -232,6 +220,7 @@ class SettingsActivity : AppCompatActivity() {
         lightJazzToggle = findViewById(R.id.light_jazz_toggle)
         keepScreenAwakeToggle = findViewById(R.id.keep_screen_awake_toggle)
         hapticFeedbackToggle = findViewById(R.id.haptic_feedback_toggle)
+        statsCard = findViewById(R.id.stats_card)
     }
 
     private fun loadSavedSettings() {
