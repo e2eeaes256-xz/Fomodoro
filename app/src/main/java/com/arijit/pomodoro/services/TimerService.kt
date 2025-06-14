@@ -20,11 +20,18 @@ class TimerService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private val updateRunnable = object : Runnable {
         override fun run() {
-            // Only update notification if app is in background
-            if (!sharedPreferences.getBoolean("isAppInForeground", true)) {
-                updateNotification()
+            if (sharedPreferences.getBoolean("timerRunning", false)) {
+                val currentTime = sharedPreferences.getLong("timeLeftInMillis", 0)
+                if (currentTime > 0) {
+                    // Update time in SharedPreferences
+                    sharedPreferences.edit().putLong("timeLeftInMillis", currentTime - 1000).apply()
+                }
+                // Only update notification if app is in background
+                if (!sharedPreferences.getBoolean("isAppInForeground", true)) {
+                    updateNotification()
+                }
+                handler.postDelayed(this, 1000)
             }
-            handler.postDelayed(this, 1000)
         }
     }
 
@@ -101,6 +108,7 @@ class TimerService : Service() {
             putString("currentFragment", fragmentType)
             putString("sessionInfo", sessionInfo)
             putBoolean("timerRunning", true)
+            putBoolean("isAppInForeground", true)
             apply()
         }
 
@@ -110,7 +118,11 @@ class TimerService : Service() {
 
     private fun stopService() {
         handler.removeCallbacks(updateRunnable)
-        sharedPreferences.edit().putBoolean("timerRunning", false).apply()
+        sharedPreferences.edit().apply {
+            putBoolean("timerRunning", false)
+            putBoolean("isAppInForeground", false)
+            apply()
+        }
         stopForeground(true)
         stopSelf()
     }

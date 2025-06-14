@@ -62,14 +62,14 @@ class TimerFragment : Fragment() {
         super.onCreate(savedInstanceState)
         sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         statsManager = StatsManager(requireContext())
-        if (savedInstanceState != null) {
-            timeLeftInMillis = savedInstanceState.getLong("timeLeftInMillis")
-            timerRunning = savedInstanceState.getBoolean("timerRunning")
-            currentSession = savedInstanceState.getInt("currentSession")
-            totalSessions = savedInstanceState.getInt("totalSessions")
-            autoStart = savedInstanceState.getBoolean("autoStart")
-            isFromShortBreak = savedInstanceState.getBoolean("isFromShortBreak")
-        } else {
+        
+        // Load saved state from SharedPreferences
+        timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
+        timerRunning = sharedPreferences.getBoolean("timerRunning", false)
+        currentSession = sharedPreferences.getInt("currentSession", 1)
+        totalSessions = sharedPreferences.getInt("totalSessions", 4)
+        
+        if (timeLeftInMillis == 0L) {
             loadSettings()
         }
     }
@@ -143,6 +143,12 @@ class TimerFragment : Fragment() {
             loadShortBreakFragment()
         }
 
+        return view
+    }
+    
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        
         // Restore timer state if it was running
         if (timerRunning) {
             playBtn.visibility = View.GONE
@@ -160,10 +166,8 @@ class TimerFragment : Fragment() {
             skipBtn.visibility = View.GONE
             updateCountdownText()
         }
-
-        return view
     }
-    
+
     override fun onResume() {
         super.onResume()
         // Notify service that app is opened
@@ -202,7 +206,11 @@ class TimerFragment : Fragment() {
                 timeLeftInMillis = millisUntilFinished
                 updateCountdownText()
                 // Update SharedPreferences with current time
-                sharedPreferences.edit().putLong("timeLeftInMillis", timeLeftInMillis).apply()
+                sharedPreferences.edit().apply {
+                    putLong("timeLeftInMillis", timeLeftInMillis)
+                    putBoolean("timerRunning", true)
+                    apply()
+                }
             }
 
             override fun onFinish() {
@@ -242,6 +250,13 @@ class TimerFragment : Fragment() {
         playBtn.visibility = View.VISIBLE
         pauseBtn.visibility = View.GONE
 
+        // Update SharedPreferences
+        sharedPreferences.edit().apply {
+            putLong("timeLeftInMillis", timeLeftInMillis)
+            putBoolean("timerRunning", false)
+            apply()
+        }
+
         // Stop the foreground service
         TimerService.stopTimer(requireContext())
     }
@@ -252,6 +267,13 @@ class TimerFragment : Fragment() {
         timerRunning = false
         updateTimerState(false)
         updateCountdownText()
+
+        // Update SharedPreferences
+        sharedPreferences.edit().apply {
+            putLong("timeLeftInMillis", timeLeftInMillis)
+            putBoolean("timerRunning", false)
+            apply()
+        }
 
         playBtn.visibility = View.VISIBLE
         pauseBtn.visibility = View.GONE
@@ -340,10 +362,10 @@ class TimerFragment : Fragment() {
     }
 
     private fun updateTimerState(isRunning: Boolean) {
-        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         sharedPreferences.edit().apply {
-            putBoolean("isTimerRunning", isRunning)
-            putBoolean("isBreakActive", false)
+            putBoolean("timerRunning", isRunning)
+            putInt("currentSession", currentSession)
+            putInt("totalSessions", totalSessions)
             apply()
         }
     }
@@ -392,6 +414,34 @@ class TimerFragment : Fragment() {
         outState.putInt("totalSessions", totalSessions)
         outState.putBoolean("autoStart", autoStart)
         outState.putBoolean("isFromShortBreak", isFromShortBreak)
+    }
+
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        if (savedInstanceState != null) {
+            timeLeftInMillis = savedInstanceState.getLong("timeLeftInMillis")
+            timerRunning = savedInstanceState.getBoolean("timerRunning")
+            currentSession = savedInstanceState.getInt("currentSession")
+            totalSessions = savedInstanceState.getInt("totalSessions")
+            autoStart = savedInstanceState.getBoolean("autoStart")
+            isFromShortBreak = savedInstanceState.getBoolean("isFromShortBreak")
+            
+            // Restore UI state
+            if (timerRunning) {
+                playBtn.visibility = View.GONE
+                pauseBtn.visibility = View.VISIBLE
+                resetBtn.visibility = View.VISIBLE
+                skipBtn.visibility = View.VISIBLE
+                startTimer()
+            } else {
+                playBtn.visibility = View.VISIBLE
+                pauseBtn.visibility = View.GONE
+                resetBtn.visibility = View.GONE
+                skipBtn.visibility = View.GONE
+            }
+            updateCountdownText()
+            updateSessionsText()
+        }
     }
 
     private fun showPresetDialog() {

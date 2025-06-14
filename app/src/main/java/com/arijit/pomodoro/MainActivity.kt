@@ -39,6 +39,8 @@ import android.os.Environment
 import com.arijit.pomodoro.fragments.LongBreakFragment
 import com.arijit.pomodoro.fragments.ShortBreakFragment
 import com.arijit.pomodoro.services.TimerService
+import com.arijit.pomodoro.utils.UltraFocusManager
+import android.content.SharedPreferences
 
 class MainActivity : AppCompatActivity() {
     private lateinit var settings_btn: ImageView
@@ -48,18 +50,57 @@ class MainActivity : AppCompatActivity() {
     private lateinit var musicAnim: LottieAnimationView
     private var mediaPlayer: MediaPlayer? = null
     private var isMusicPlaying = false
+    private lateinit var sharedPreferences: SharedPreferences
 
     private val settingsLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == SettingsActivity.RESULT_TIMER_SETTINGS_CHANGED) {
-            // Reset session count and reload timer only if timer settings were modified
+            // Only reset if timer settings were modified
             val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
-            sharedPreferences.edit().apply {
-                putInt("currentSession", 1)
-                putBoolean("wereTimerSettingsModified", false)
-                apply()
+            if (sharedPreferences.getBoolean("wereTimerSettingsModified", false)) {
+                // Check if timer is running
+                val isTimerRunning = sharedPreferences.getBoolean("timerRunning", false)
+                if (!isTimerRunning) {
+                    // Only reset if timer is not running
+                    sharedPreferences.edit().apply {
+                        putInt("currentSession", 1)
+                        putBoolean("wereTimerSettingsModified", false)
+                        apply()
+                    }
+                    // Reload the timer fragment with new settings
+                    showTimerFragment()
+                } else {
+                    // If timer is running, just update the settings without resetting
+                    sharedPreferences.edit().putBoolean("wereTimerSettingsModified", false).apply()
+                    // Restore the current fragment with its state
+                    val fragmentType = sharedPreferences.getString("currentFragment", "focus") ?: "focus"
+                    val sessionInfo = sharedPreferences.getString("sessionInfo", "1/4") ?: "1/4"
+                    when (fragmentType) {
+                        "focus" -> {
+                            val sessionParts = sessionInfo.split("/")
+                            if (sessionParts.size == 2) {
+                                val currentSession = sessionParts[0].toIntOrNull() ?: 1
+                                val totalSessions = sessionParts[1].toIntOrNull() ?: 4
+                                val fragment = TimerFragment.newInstance(currentSession, totalSessions, false)
+                                supportFragmentManager.beginTransaction()
+                                    .replace(R.id.frame_layout, fragment)
+                                    .commit()
+                            }
+                        }
+                        "shortBreak" -> {
+                            val fragment = ShortBreakFragment()
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.frame_layout, fragment)
+                                .commit()
+                        }
+                        "longBreak" -> {
+                            val fragment = LongBreakFragment()
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.frame_layout, fragment)
+                                .commit()
+                        }
+                    }
+                }
             }
-            // Reload the timer fragment with new settings
-            showTimerFragment()
         }
     }
 
@@ -237,8 +278,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        // Initialize sharedPreferences
+        sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        
         // Initialize theme before setting content view
-        val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
         
@@ -269,6 +312,15 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        // Apply ultra focus mode if enabled
+        if (sharedPreferences.getBoolean("ultraFocusMode", false)) {
+            UltraFocusManager.enableUltraFocusMode(this)
+            UltraFocusManager.setOrientation(this, true)
+        } else {
+            // Ensure we're in portrait mode and allow orientation changes
+            UltraFocusManager.setOrientation(this, false)
         }
 
         // Check if we need to restore a specific fragment from notification
@@ -365,6 +417,7 @@ class MainActivity : AppCompatActivity() {
         val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
         val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
+        val ultraFocusMode = sharedPreferences.getBoolean("ultraFocusMode", false)
 
         if (amoledMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
@@ -372,6 +425,15 @@ class MainActivity : AppCompatActivity() {
         } else if (darkMode) {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
             sharedPreferences.edit().putBoolean("amoledMode", false).apply()
+        }
+
+        // Handle ultra focus mode state
+        if (ultraFocusMode) {
+            UltraFocusManager.enableUltraFocusMode(this)
+            UltraFocusManager.setOrientation(this, true)
+        } else {
+            UltraFocusManager.disableUltraFocusMode(this)
+            UltraFocusManager.setOrientation(this, false)
         }
     }
 
@@ -414,5 +476,10 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         stopMusic()
+        // Disable ultra focus mode when app is closed
+        if (sharedPreferences.getBoolean("ultraFocusMode", false)) {
+            UltraFocusManager.disableUltraFocusMode(this)
+            UltraFocusManager.setOrientation(this, false)
+        }
     }
 }

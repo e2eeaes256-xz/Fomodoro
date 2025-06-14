@@ -38,6 +38,11 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
+import android.content.pm.ActivityInfo
+import android.media.AudioAttributes
+import android.media.RingtoneManager
+import android.widget.Toast
+import com.arijit.pomodoro.utils.UltraFocusManager
 
 class SettingsActivity : AppCompatActivity() {
     private lateinit var backBtn: ImageView
@@ -74,6 +79,10 @@ class SettingsActivity : AppCompatActivity() {
     private val CHANNEL_ID = "download_channel"
     private val NOTIFICATION_ID = 1
     private var wakeLock: android.os.PowerManager.WakeLock? = null
+    private lateinit var ultraFocusModeToggle: MaterialSwitch
+    private var originalOrientation: Int = 0
+    private var originalDndMode: Int = 0
+    private lateinit var notificationManager: NotificationManager
 
     private var isUpdatingSlider = false
 
@@ -87,6 +96,22 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private val notificationPolicyPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            // Permission granted, enable ultra focus mode
+            sharedPreferences.edit().putBoolean("ultraFocusMode", true).apply()
+            UltraFocusManager.enableUltraFocusMode(this)
+            UltraFocusManager.setOrientation(this, true)
+        } else {
+            // Permission denied, revert toggle
+            ultraFocusModeToggle.isChecked = false
+            sharedPreferences.edit().putBoolean("ultraFocusMode", false).apply()
+            Toast.makeText(this, "Permission denied. Ultra focus mode requires notification policy access.", Toast.LENGTH_LONG).show()
+        }
+    }
+
     companion object {
         const val RESULT_TIMER_SETTINGS_CHANGED = 100
     }
@@ -96,6 +121,9 @@ class SettingsActivity : AppCompatActivity() {
         
         // Initialize sharedPreferences first
         sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        
+        // Initialize notification manager
+        notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         
         // Initialize theme before setting content view
         val darkMode = sharedPreferences.getBoolean("darkMode", false)
@@ -139,6 +167,21 @@ class SettingsActivity : AppCompatActivity() {
         initializeMusicToggles()
         setupMusicToggleListeners()
 
+        // Initialize ultra focus mode toggle
+        ultraFocusModeToggle = findViewById(R.id.ultra_focus_mode_toggle)
+        // Set initial state from SharedPreferences
+        ultraFocusModeToggle.isChecked = sharedPreferences.getBoolean("ultraFocusMode", false)
+        
+        // Save original orientation
+        originalOrientation = requestedOrientation
+        
+        setupUltraFocusModeToggle()
+
+        // Apply ultra focus mode if it was enabled
+        if (ultraFocusModeToggle.isChecked) {
+            enableUltraFocusMode()
+        }
+
         statsCard.setOnClickListener {
             vibrate()
             startActivity(Intent(this@SettingsActivity, StatsActivity::class.java))
@@ -174,7 +217,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun checkTimerState() {
-        val isTimerRunning = sharedPreferences.getBoolean("isTimerRunning", false)
+        val isTimerRunning = sharedPreferences.getBoolean("timerRunning", false)
         val isBreakActive = sharedPreferences.getBoolean("isBreakActive", false)
 
         if (isTimerRunning || isBreakActive) {
@@ -188,6 +231,11 @@ class SettingsActivity : AppCompatActivity() {
             uiSettingsComponents.visibility = View.VISIBLE
             runningTimerTxt.visibility = View.GONE
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkTimerState()
     }
 
     private fun initializeViews() {
@@ -682,5 +730,99 @@ class SettingsActivity : AppCompatActivity() {
         super.onDestroy()
         wakeLock?.release()
         wakeLock = null
+        // Ensure we restore original settings when activity is destroyed
+        if (ultraFocusModeToggle.isChecked) {
+            disableUltraFocusMode()
+        }
+    }
+
+    private fun setupUltraFocusModeToggle() {
+        ultraFocusModeToggle.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                // Check if we have notification policy access
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (notificationManager.isNotificationPolicyAccessGranted) {
+                        sharedPreferences.edit().putBoolean("ultraFocusMode", true).apply()
+                        UltraFocusManager.enableUltraFocusMode(this)
+                        UltraFocusManager.setOrientation(this, true)
+                    } else {
+                        // Request notification policy access
+                        val intent = Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+                        notificationPolicyPermissionLauncher.launch(intent)
+                    }
+                } else {
+                    sharedPreferences.edit().putBoolean("ultraFocusMode", true).apply()
+                    UltraFocusManager.enableUltraFocusMode(this)
+                    UltraFocusManager.setOrientation(this, true)
+                }
+            } else {
+                sharedPreferences.edit().putBoolean("ultraFocusMode", false).apply()
+                UltraFocusManager.disableUltraFocusMode(this)
+                UltraFocusManager.setOrientation(this, false)
+            }
+        }
+    }
+
+    private fun enableUltraFocusMode() {
+        try {
+            // Save current DND mode
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (notificationManager.isNotificationPolicyAccessGranted) {
+                    originalDndMode = notificationManager.currentInterruptionFilter
+                    // Set DND mode to priority only
+                    notificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+                } else {
+                    throw SecurityException("Notification policy access not granted")
+                }
+            }
+
+            // Force landscape orientation
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+
+            // Disable notifications
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = notificationManager.getNotificationChannel("timer_notifications")
+                channel?.let {
+                    it.enableLights(false)
+                    it.enableVibration(false)
+                    it.setSound(null, null)
+                }
+            }
+        } catch (e: SecurityException) {
+            // Handle permission error
+            ultraFocusModeToggle.isChecked = false
+            sharedPreferences.edit().putBoolean("ultraFocusMode", false).apply()
+            Toast.makeText(this, "Permission denied. Ultra focus mode requires notification policy access.", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun disableUltraFocusMode() {
+        try {
+            // Restore original DND mode
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (notificationManager.isNotificationPolicyAccessGranted) {
+                    notificationManager.setInterruptionFilter(originalDndMode)
+                }
+            }
+
+            // Restore original orientation
+            requestedOrientation = originalOrientation
+
+            // Re-enable notifications
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = notificationManager.getNotificationChannel("timer_notifications")
+                channel?.let {
+                    it.enableLights(true)
+                    it.enableVibration(true)
+                    it.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), AudioAttributes.Builder()
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .build())
+                }
+            }
+        } catch (e: SecurityException) {
+            // Handle permission error
+            Toast.makeText(this, "Error restoring settings: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
 }
