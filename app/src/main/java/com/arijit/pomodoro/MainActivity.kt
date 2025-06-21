@@ -59,6 +59,8 @@ class MainActivity : AppCompatActivity() {
             if (sharedPreferences.getBoolean("wereTimerSettingsModified", false)) {
                 // Check if timer is running
                 val isTimerRunning = sharedPreferences.getBoolean("timerRunning", false)
+                // Clear timeLeftInMillis to force reload from settings
+                sharedPreferences.edit().putLong("timeLeftInMillis", 0).apply()
                 if (!isTimerRunning) {
                     // Only reset if timer is not running
                     sharedPreferences.edit().apply {

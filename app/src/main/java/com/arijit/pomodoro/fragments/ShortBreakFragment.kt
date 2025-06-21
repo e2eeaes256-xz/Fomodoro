@@ -159,7 +159,8 @@ class ShortBreakFragment : Fragment() {
         
         // Only increment session if we're not manually going back
         val nextSession = if (isFromTimer) currentSession + 1 else currentSession
-        val fragment = TimerFragment.newInstance(nextSession, totalSessions, autoStart, false)
+        // If going back to timer, set isFromShortBreak=true to reset timer
+        val fragment = TimerFragment.newInstance(nextSession, totalSessions, autoStart, true)
         parentFragmentManager.beginTransaction()
             .replace(R.id.frame_layout, fragment)
             .commit()

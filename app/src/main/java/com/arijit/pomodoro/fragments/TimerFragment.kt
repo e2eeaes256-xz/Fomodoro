@@ -62,14 +62,15 @@ class TimerFragment : Fragment() {
         super.onCreate(savedInstanceState)
         sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         statsManager = StatsManager(requireContext())
-        
-        // Load saved state from SharedPreferences
-        timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
+
         timerRunning = sharedPreferences.getBoolean("timerRunning", false)
+        timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
         currentSession = sharedPreferences.getInt("currentSession", 1)
         totalSessions = sharedPreferences.getInt("totalSessions", 4)
-        
-        if (timeLeftInMillis == 0L) {
+        autoStart = sharedPreferences.getBoolean("autoStart", false)
+
+        // If timer is not running or timeLeftInMillis is 0, always load from settings
+        if (!timerRunning || timeLeftInMillis == 0L) {
             loadSettings()
         }
     }
@@ -170,25 +171,30 @@ class TimerFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Notify service that app is opened
         TimerService.appOpened(requireContext())
-        
-        // Check if timer is running in service
-        val isServiceRunning = sharedPreferences.getBoolean("timerRunning", false)
-        if (isServiceRunning) {
-            // Get the current time from service
-            timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
-            updateCountdownText()
-            timerRunning = true
+
+        timerRunning = sharedPreferences.getBoolean("timerRunning", false)
+        timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
+
+        if (timerRunning && timeLeftInMillis > 0) {
+            // Resume timer
             playBtn.visibility = View.GONE
             pauseBtn.visibility = View.VISIBLE
             resetBtn.visibility = View.VISIBLE
             skipBtn.visibility = View.VISIBLE
-            
-            // Only start a new timer if one isn't already running
             if (countDownTimer == null) {
                 startTimer()
             }
+            updateCountdownText()
+        } else {
+            // Not running, show timer with value from settings
+            timerRunning = false
+            loadSettings()
+            playBtn.visibility = View.VISIBLE
+            pauseBtn.visibility = View.GONE
+            resetBtn.visibility = View.GONE
+            skipBtn.visibility = View.GONE
+            updateCountdownText()
         }
     }
 
