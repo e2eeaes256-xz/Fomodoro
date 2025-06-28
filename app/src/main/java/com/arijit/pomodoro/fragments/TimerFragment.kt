@@ -32,6 +32,7 @@ import com.google.gson.reflect.TypeToken
 import android.widget.EditText
 import com.arijit.pomodoro.services.TimerService
 import android.content.SharedPreferences
+import androidx.annotation.RequiresApi
 import com.arijit.pomodoro.utils.StatsManager
 
 class TimerFragment : Fragment() {
@@ -63,16 +64,19 @@ class TimerFragment : Fragment() {
         sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         statsManager = StatsManager(requireContext())
 
-        timerRunning = sharedPreferences.getBoolean("timerRunning", false)
-        timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
-        currentSession = sharedPreferences.getInt("currentSession", 1)
-        totalSessions = sharedPreferences.getInt("totalSessions", 4)
-        autoStart = sharedPreferences.getBoolean("autoStart", false)
+        if (savedInstanceState == null) {
+            timerRunning = sharedPreferences.getBoolean("timerRunning", false)
+            timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
+            currentSession = sharedPreferences.getInt("currentSession", 1)
+            totalSessions = sharedPreferences.getInt("totalSessions", 4)
+            autoStart = sharedPreferences.getBoolean("autoStart", false)
 
-        // If timer is not running or timeLeftInMillis is 0, always load from settings
-        if (!timerRunning || timeLeftInMillis == 0L) {
-            loadSettings()
+            // If timer is not running or timeLeftInMillis is 0, always load from settings
+            if (!timerRunning || timeLeftInMillis == 0L) {
+                loadSettings()
+            }
         }
+        // else: state will be restored from the bundle, do not overwrite!
     }
     
     private fun loadSettings() {
@@ -173,8 +177,11 @@ class TimerFragment : Fragment() {
         super.onResume()
         TimerService.appOpened(requireContext())
 
-        timerRunning = sharedPreferences.getBoolean("timerRunning", false)
-        timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
+        // Only update from SharedPreferences if not restoring from rotation
+        if (!timerRunning && timeLeftInMillis == 0L) {
+            timerRunning = sharedPreferences.getBoolean("timerRunning", false)
+            timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
+        }
 
         if (timerRunning && timeLeftInMillis > 0) {
             // Resume timer
@@ -219,6 +226,7 @@ class TimerFragment : Fragment() {
                 }
             }
 
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun onFinish() {
                 timerRunning = false
                 updateTimerState(false)
