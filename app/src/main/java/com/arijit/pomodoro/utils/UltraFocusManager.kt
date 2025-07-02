@@ -8,6 +8,9 @@ import android.media.RingtoneManager
 import android.os.Build
 import android.view.WindowManager
 import android.widget.Toast
+import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 
 object UltraFocusManager {
     private var originalOrientation: Int = 0
@@ -50,6 +53,17 @@ object UltraFocusManager {
                     WindowManager.LayoutParams.FLAG_FULLSCREEN,
                     WindowManager.LayoutParams.FLAG_FULLSCREEN
                 )
+                // Hide status bar for Android 11+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    context.window.insetsController?.let { controller ->
+                        controller.hide(WindowInsets.Type.statusBars())
+                        controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                    }
+                } else {
+                    // For older versions, use legacy flags
+                    context.window.decorView.systemUiVisibility =
+                        View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                }
             }
         } catch (e: SecurityException) {
             Toast.makeText(context, "Error enabling ultra focus mode: ${e.message}", Toast.LENGTH_LONG).show()
@@ -84,7 +98,11 @@ object UltraFocusManager {
             // Show notification bar and exit fullscreen
             if (context is android.app.Activity) {
                 context.window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-                context.window.decorView.systemUiVisibility = originalSystemUiVisibility
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    context.window.insetsController?.show(WindowInsets.Type.statusBars())
+                } else {
+                    context.window.decorView.systemUiVisibility = originalSystemUiVisibility
+                }
             }
         } catch (e: SecurityException) {
             Toast.makeText(context, "Error disabling ultra focus mode: ${e.message}", Toast.LENGTH_LONG).show()
