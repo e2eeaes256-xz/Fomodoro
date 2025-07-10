@@ -58,6 +58,7 @@ class TimerFragment : Fragment() {
     private var totalSessions = 4
     private var autoStart = false
     private var isFromShortBreak = false
+    private var elapsedSeconds = 0 // Add this variable to track seconds
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,10 +68,16 @@ class TimerFragment : Fragment() {
         if (savedInstanceState == null) {
             timerRunning = sharedPreferences.getBoolean("timerRunning", false)
             timeLeftInMillis = sharedPreferences.getLong("timeLeftInMillis", 0)
-            currentSession = sharedPreferences.getInt("currentSession", 1)
-            totalSessions = sharedPreferences.getInt("totalSessions", 4)
-            autoStart = sharedPreferences.getBoolean("autoStart", false)
-
+            // Only set currentSession, totalSessions, autoStart if not already set by newInstance
+            if (this.currentSession == 1) {
+                currentSession = sharedPreferences.getInt("currentSession", 1)
+            }
+            if (this.totalSessions == 4) {
+                totalSessions = sharedPreferences.getInt("totalSessions", 4)
+            }
+            if (!this.autoStart) {
+                autoStart = sharedPreferences.getBoolean("autoStart", false)
+            }
             // If timer is not running or timeLeftInMillis is 0, always load from settings
             if (!timerRunning || timeLeftInMillis == 0L) {
                 loadSettings()
@@ -213,7 +220,7 @@ class TimerFragment : Fragment() {
 
     private fun startTimer() {
         countDownTimer?.cancel() // Cancel any existing timer
-        
+        elapsedSeconds = 0 // Reset elapsed seconds at the start
         countDownTimer = object : CountDownTimer(timeLeftInMillis, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis = millisUntilFinished
@@ -223,6 +230,11 @@ class TimerFragment : Fragment() {
                     putLong("timeLeftInMillis", timeLeftInMillis)
                     putBoolean("timerRunning", true)
                     apply()
+                }
+                // Increment elapsed seconds and update stats every minute
+                elapsedSeconds++
+                if (elapsedSeconds % 60 == 0) {
+                    statsManager.updateStats(1) // Add 1 minute to stats
                 }
             }
 

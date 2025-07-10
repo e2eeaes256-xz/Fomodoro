@@ -238,6 +238,11 @@ class SettingsActivity : AppCompatActivity() {
         checkTimerState()
     }
 
+    override fun onPause() {
+        super.onPause()
+        saveSettings()
+    }
+
     private fun initializeViews() {
         backBtn = findViewById(R.id.back_btn)
         focusedTimeTxt = findViewById(R.id.focused_time_txt)
