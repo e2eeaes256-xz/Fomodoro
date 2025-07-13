@@ -147,7 +147,19 @@ class TimerFragment : Fragment() {
         
         resetBtn.setOnClickListener {
             vibrate()
-            resetTimer()
+            // Show confirmation dialog before resetting
+            AlertDialog.Builder(requireContext())
+                .setTitle("Reset Timer")
+                .setMessage("Do you want to reset the timer?")
+                .setPositiveButton("Yes") { _, _ ->
+                    // Reset session count to 1
+                    currentSession = 1
+                    sharedPreferences.edit().putInt("currentSession", 1).apply()
+                    resetTimer()
+                    updateSessionsText()
+                }
+                .setNegativeButton("No", null)
+                .show()
         }
         
         skipBtn.setOnClickListener {
@@ -229,10 +241,11 @@ class TimerFragment : Fragment() {
                 sharedPreferences.edit().apply {
                     putLong("timeLeftInMillis", timeLeftInMillis)
                     putBoolean("timerRunning", true)
+                    // Save elapsedSeconds for background recovery
+                    putInt("elapsedSeconds", ++elapsedSeconds)
                     apply()
                 }
-                // Increment elapsed seconds and update stats every minute
-                elapsedSeconds++
+                // Update stats every minute
                 if (elapsedSeconds % 60 == 0) {
                     statsManager.updateStats(1) // Add 1 minute to stats
                 }
@@ -243,11 +256,13 @@ class TimerFragment : Fragment() {
                 timerRunning = false
                 updateTimerState(false)
                 playAlarm()
-                
-                // Update stats when timer completes
-                val focusMinutes = (sharedPreferences.getInt("focusedTime", 25))
-                statsManager.updateStats(focusMinutes)
-                
+                // Only add any remaining seconds as minutes if not already counted
+                val leftoverSeconds = elapsedSeconds % 60
+                if (leftoverSeconds > 0) {
+                    // Add partial minute if any
+                    statsManager.updateStats(1) // Optionally, could use: Math.round(leftoverSeconds / 60.0)
+                }
+                // Remove double-counting: do NOT add full session again
                 if (currentSession < totalSessions) {
                     loadShortBreakFragment()
                 } else {

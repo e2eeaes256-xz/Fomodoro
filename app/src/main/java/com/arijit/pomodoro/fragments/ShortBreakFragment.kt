@@ -158,7 +158,10 @@ class ShortBreakFragment : Fragment() {
         }
         
         // Always increment session when returning to timer after short break
-        val nextSession = currentSession + 1
+        var nextSession = currentSession + 1
+        if (nextSession > totalSessions) {
+            nextSession = 1
+        }
         // If going back to timer, set isFromShortBreak=true to reset timer
         val fragment = TimerFragment.newInstance(nextSession, totalSessions, autoStart, true)
         parentFragmentManager.beginTransaction()

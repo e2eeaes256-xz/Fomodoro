@@ -14,10 +14,13 @@ import com.arijit.pomodoro.R
 import android.content.SharedPreferences
 import android.os.Handler
 import android.os.Looper
+import com.arijit.pomodoro.utils.StatsManager
 
 class TimerService : Service() {
     private lateinit var sharedPreferences: SharedPreferences
     private val handler = Handler(Looper.getMainLooper())
+    private lateinit var statsManager: StatsManager
+    private var elapsedSeconds: Int = 0
     private val updateRunnable = object : Runnable {
         override fun run() {
             if (sharedPreferences.getBoolean("timerRunning", false)) {
@@ -25,6 +28,12 @@ class TimerService : Service() {
                 if (currentTime > 0) {
                     // Update time in SharedPreferences
                     sharedPreferences.edit().putLong("timeLeftInMillis", currentTime - 1000).apply()
+                    elapsedSeconds = sharedPreferences.getInt("elapsedSeconds", 0) + 1
+                    sharedPreferences.edit().putInt("elapsedSeconds", elapsedSeconds).apply()
+                    // Update stats every minute in background
+                    if (elapsedSeconds % 60 == 0) {
+                        statsManager.updateStats(1)
+                    }
                 }
                 // Only update notification if app is in background
                 if (!sharedPreferences.getBoolean("isAppInForeground", true)) {
@@ -71,6 +80,7 @@ class TimerService : Service() {
     override fun onCreate() {
         super.onCreate()
         sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        statsManager = StatsManager(this)
         createNotificationChannel()
     }
 
@@ -118,6 +128,12 @@ class TimerService : Service() {
 
     private fun stopService() {
         handler.removeCallbacks(updateRunnable)
+        // On stop, add any remaining seconds as minutes if not already counted
+        val leftoverSeconds = sharedPreferences.getInt("elapsedSeconds", 0) % 60
+        if (leftoverSeconds > 0) {
+            statsManager.updateStats(1)
+        }
+        sharedPreferences.edit().putInt("elapsedSeconds", 0).apply()
         sharedPreferences.edit().apply {
             putBoolean("timerRunning", false)
             putBoolean("isAppInForeground", false)

@@ -57,6 +57,8 @@ class MainActivity : AppCompatActivity() {
             // Only reset if timer settings were modified
             val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
             if (sharedPreferences.getBoolean("wereTimerSettingsModified", false)) {
+                // Always reset currentSession to 1
+                sharedPreferences.edit().putInt("currentSession", 1).apply()
                 // Check if timer is running
                 val isTimerRunning = sharedPreferences.getBoolean("timerRunning", false)
                 // Clear timeLeftInMillis to force reload from settings
@@ -64,7 +66,6 @@ class MainActivity : AppCompatActivity() {
                 if (!isTimerRunning) {
                     // Only reset if timer is not running
                     sharedPreferences.edit().apply {
-                        putInt("currentSession", 1)
                         putBoolean("wereTimerSettingsModified", false)
                         apply()
                     }
@@ -73,20 +74,15 @@ class MainActivity : AppCompatActivity() {
                 } else {
                     // If timer is running, just update the settings without resetting
                     sharedPreferences.edit().putBoolean("wereTimerSettingsModified", false).apply()
-                    // Restore the current fragment with its state
+                    // Restore the current fragment with its state, but force session to 1
                     val fragmentType = sharedPreferences.getString("currentFragment", "focus") ?: "focus"
-                    val sessionInfo = sharedPreferences.getString("sessionInfo", "1/4") ?: "1/4"
+                    val totalSessions = sharedPreferences.getInt("sessions", 4)
                     when (fragmentType) {
                         "focus" -> {
-                            val sessionParts = sessionInfo.split("/")
-                            if (sessionParts.size == 2) {
-                                val currentSession = sessionParts[0].toIntOrNull() ?: 1
-                                val totalSessions = sessionParts[1].toIntOrNull() ?: 4
-                                val fragment = TimerFragment.newInstance(currentSession, totalSessions, false)
-                                supportFragmentManager.beginTransaction()
-                                    .replace(R.id.frame_layout, fragment)
-                                    .commit()
-                            }
+                            val fragment = TimerFragment.newInstance(1, totalSessions, false)
+                            supportFragmentManager.beginTransaction()
+                                .replace(R.id.frame_layout, fragment)
+                                .commit()
                         }
                         "shortBreak" -> {
                             val fragment = ShortBreakFragment()
