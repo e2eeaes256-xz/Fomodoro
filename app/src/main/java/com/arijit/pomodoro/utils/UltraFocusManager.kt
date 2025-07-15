@@ -114,8 +114,8 @@ object UltraFocusManager {
             originalOrientation = activity.requestedOrientation
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         } else {
-            // Allow user to change orientation freely
-            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+            // Lock to portrait when not in ultra focus mode
+            activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
     }
 

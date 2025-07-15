@@ -45,7 +45,6 @@ import android.widget.Toast
 import com.arijit.pomodoro.utils.UltraFocusManager
 
 class SettingsActivity : AppCompatActivity() {
-    private lateinit var backBtn: ImageView
     private lateinit var focusedTimeTxt: EditText
     private lateinit var focusedTimeSlider: Slider
     private lateinit var shortBreakTxt: EditText
@@ -121,6 +120,14 @@ class SettingsActivity : AppCompatActivity() {
         
         // Initialize sharedPreferences first
         sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        
+        // Lock to portrait unless ultra focus mode is enabled
+        if (sharedPreferences.getBoolean("ultraFocusMode", false)) {
+            UltraFocusManager.enableUltraFocusMode(this)
+            UltraFocusManager.setOrientation(this, true)
+        } else {
+            UltraFocusManager.setOrientation(this, false)
+        }
         
         // Initialize notification manager
         notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -235,6 +242,15 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Lock to portrait unless ultra focus mode is enabled
+        val ultraFocusMode = sharedPreferences.getBoolean("ultraFocusMode", false)
+        if (ultraFocusMode) {
+            UltraFocusManager.enableUltraFocusMode(this)
+            UltraFocusManager.setOrientation(this, true)
+        } else {
+            UltraFocusManager.disableUltraFocusMode(this)
+            UltraFocusManager.setOrientation(this, false)
+        }
         checkTimerState()
     }
 
@@ -244,7 +260,6 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun initializeViews() {
-        backBtn = findViewById(R.id.back_btn)
         focusedTimeTxt = findViewById(R.id.focused_time_txt)
         focusedTimeSlider = findViewById(R.id.slider_focused_time)
         shortBreakTxt = findViewById(R.id.short_break_txt)
@@ -307,14 +322,6 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        backBtn.setOnClickListener {
-            saveSettings()
-            if (sharedPreferences.getBoolean("wereTimerSettingsModified", false)) {
-                setResult(RESULT_TIMER_SETTINGS_CHANGED)
-            }
-            finish()
-            vibrate()
-        }
 
         focusedTimeSlider.addOnChangeListener { _, value, _ ->
             if (!isUpdatingSlider) {

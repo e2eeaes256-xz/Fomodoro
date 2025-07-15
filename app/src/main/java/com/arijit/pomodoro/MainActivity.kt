@@ -279,29 +279,12 @@ class MainActivity : AppCompatActivity() {
         // Initialize sharedPreferences
         sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         
-        // Initialize theme before setting content view
-        val darkMode = sharedPreferences.getBoolean("darkMode", false)
-        val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
-        
-        // Set theme mode only once
-        when {
-            amoledMode -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                sharedPreferences.edit().apply {
-                    putBoolean("darkMode", false)
-                    apply()
-                }
-            }
-            darkMode -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                sharedPreferences.edit().apply {
-                    putBoolean("amoledMode", false)
-                    apply()
-                }
-            }
-            else -> {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
+        // Lock to portrait unless ultra focus mode is enabled
+        if (sharedPreferences.getBoolean("ultraFocusMode", false)) {
+            UltraFocusManager.enableUltraFocusMode(this)
+            UltraFocusManager.setOrientation(this, true)
+        } else {
+            UltraFocusManager.setOrientation(this, false)
         }
         
         enableEdgeToEdge()
@@ -310,15 +293,6 @@ class MainActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
-        }
-
-        // Apply ultra focus mode if enabled
-        if (sharedPreferences.getBoolean("ultraFocusMode", false)) {
-            UltraFocusManager.enableUltraFocusMode(this)
-            UltraFocusManager.setOrientation(this, true)
-        } else {
-            // Ensure we're in portrait mode and allow orientation changes
-            UltraFocusManager.setOrientation(this, false)
         }
 
         // Check if we need to restore a specific fragment from notification
@@ -413,19 +387,9 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         val sharedPreferences = getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
-        val darkMode = sharedPreferences.getBoolean("darkMode", false)
-        val amoledMode = sharedPreferences.getBoolean("amoledMode", false)
         val ultraFocusMode = sharedPreferences.getBoolean("ultraFocusMode", false)
 
-        if (amoledMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            sharedPreferences.edit().putBoolean("darkMode", false).apply()
-        } else if (darkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            sharedPreferences.edit().putBoolean("amoledMode", false).apply()
-        }
-
-        // Handle ultra focus mode state
+        // Lock to portrait unless ultra focus mode is enabled
         if (ultraFocusMode) {
             UltraFocusManager.enableUltraFocusMode(this)
             UltraFocusManager.setOrientation(this, true)
