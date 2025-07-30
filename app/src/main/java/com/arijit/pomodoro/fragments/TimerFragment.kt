@@ -226,7 +226,6 @@ class TimerFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        // Mark that app is in background
         sharedPreferences.edit().putBoolean("isAppInForeground", false).apply()
     }
 
@@ -234,6 +233,7 @@ class TimerFragment : Fragment() {
         countDownTimer?.cancel() // Cancel any existing timer
         elapsedSeconds = 0 // Reset elapsed seconds at the start
         countDownTimer = object : CountDownTimer(timeLeftInMillis, 1000) {
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis = millisUntilFinished
                 updateCountdownText()
@@ -428,19 +428,33 @@ class TimerFragment : Fragment() {
             notificationManager.notify(1, builder.build())
 
             // Vibrate
-            val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            if (vibrator.hasVibrator()) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val vibrationEffect = VibrationEffect.createWaveform(longArrayOf(0, 500, 500), 0)
-                    vibrator.vibrate(vibrationEffect)
-                } else {
-                    vibrator.vibrate(longArrayOf(0, 500, 500), 0)
-                }
-            }
+            try {
+                val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                if (vibrator.hasVibrator()) {
+                    val notificationManager = requireContext().getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    val canVibrate = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        notificationManager.isNotificationPolicyAccessGranted &&
+                        notificationManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_NONE
+                    } else true
 
+                    if (canVibrate) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            val vibrationEffect = VibrationEffect.createWaveform(longArrayOf(0, 500, 500), 0)
+                            vibrator.vibrate(vibrationEffect)
+                        } else {
+                            vibrator.vibrate(longArrayOf(0, 500, 500), 0)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
             // Stop after configured duration
             android.os.Handler().postDelayed({
-                vibrator.cancel()
+                try {
+                    val vibrator = requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+                    vibrator.cancel()
+                } catch (_: Exception) {}
             }, alarmDuration)
         } catch (e: Exception) {
             e.printStackTrace()

@@ -181,9 +181,14 @@ class MainActivity : AppCompatActivity() {
             ).apply {
                 description = "Notifications for timer completion"
                 enableVibration(true)
+                // Do not set a vibration pattern here unless you want a custom one and it's not empty
             }
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+            try {
+                notificationManager.createNotificationChannel(channel)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

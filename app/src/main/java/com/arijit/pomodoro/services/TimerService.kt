@@ -153,9 +153,14 @@ class TimerService : Service() {
                 description = "Shows ongoing timer status"
                 enableVibration(false)
                 setSound(null, null)
+                // Do not set a vibration pattern here unless you want a custom one and it's not empty
             }
             val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+            try {
+                notificationManager.createNotificationChannel(channel)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

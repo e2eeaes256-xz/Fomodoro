@@ -10,9 +10,9 @@ android {
     defaultConfig {
         applicationId = "com.arijit.pomodoro"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 12
-        versionName = "1.12"
+        targetSdk = 35
+        versionCode = 14
+        versionName = "1.14"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
