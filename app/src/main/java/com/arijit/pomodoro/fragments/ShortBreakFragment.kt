@@ -38,6 +38,7 @@ class ShortBreakFragment : Fragment() {
     private lateinit var shortBreakTxt: TextView
     private lateinit var sessionsTxt: TextView
     private var mediaPlayer: MediaPlayer? = null
+    private var clockSoundPlayer: MediaPlayer? = null
     private var countDownTimer: CountDownTimer? = null
     private var timeLeftInMillis: Long = 0
     private var timerRunning = false
@@ -48,6 +49,9 @@ class ShortBreakFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Initialize clock sound player
+        clockSoundPlayer = MediaPlayer.create(requireContext(), R.raw.clock_sound)
+        
         if (savedInstanceState != null) {
             timeLeftInMillis = savedInstanceState.getLong("timeLeftInMillis")
             timerRunning = savedInstanceState.getBoolean("timerRunning")
@@ -173,6 +177,7 @@ class ShortBreakFragment : Fragment() {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis = millisUntilFinished
                 updateCountdownText()
+                playClockSound()
             }
 
             override fun onFinish() {
@@ -271,6 +276,21 @@ class ShortBreakFragment : Fragment() {
         countDownTimer?.cancel()
         mediaPlayer?.release()
         mediaPlayer = null
+        clockSoundPlayer?.release()
+        clockSoundPlayer = null
+    }
+
+    private fun playClockSound() {
+        val sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
+        val clockSoundEnabled = sharedPreferences.getBoolean("clockSound", false)
+        if (clockSoundEnabled && clockSoundPlayer != null) {
+            try {
+                clockSoundPlayer?.seekTo(0)
+                clockSoundPlayer?.start()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun setSessionInfo(currentSession: Int, totalSessions: Int, autoStart: Boolean, isFromTimer: Boolean = false) {

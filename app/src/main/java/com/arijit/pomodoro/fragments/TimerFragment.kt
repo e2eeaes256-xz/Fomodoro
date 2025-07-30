@@ -48,6 +48,7 @@ class TimerFragment : Fragment() {
     private lateinit var focusTxt: TextView
     private lateinit var sessionsTxt: TextView
     private var mediaPlayer: MediaPlayer? = null
+    private var clockSoundPlayer: MediaPlayer? = null
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var statsManager: StatsManager
     
@@ -64,6 +65,9 @@ class TimerFragment : Fragment() {
         super.onCreate(savedInstanceState)
         sharedPreferences = requireContext().getSharedPreferences("PomodoroSettings", Context.MODE_PRIVATE)
         statsManager = StatsManager(requireContext())
+
+        // Initialize clock sound player
+        clockSoundPlayer = MediaPlayer.create(requireContext(), R.raw.clock_sound)
 
         if (savedInstanceState == null) {
             timerRunning = sharedPreferences.getBoolean("timerRunning", false)
@@ -132,6 +136,7 @@ class TimerFragment : Fragment() {
 
         focusCard.setOnClickListener {
             vibrate()
+            Toast.makeText(requireContext(), "This feature is still in beta. Bugs may exist", Toast.LENGTH_SHORT).show()
             showPresetDialog()
         }
         
@@ -237,6 +242,10 @@ class TimerFragment : Fragment() {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis = millisUntilFinished
                 updateCountdownText()
+                
+                // Play clock sound if enabled
+                playClockSound()
+                
                 // Update SharedPreferences with current time
                 sharedPreferences.edit().apply {
                     putLong("timeLeftInMillis", timeLeftInMillis)
@@ -358,6 +367,20 @@ class TimerFragment : Fragment() {
         countDownTimer?.cancel()
         mediaPlayer?.release()
         mediaPlayer = null
+        clockSoundPlayer?.release()
+        clockSoundPlayer = null
+    }
+
+    private fun playClockSound() {
+        val clockSoundEnabled = sharedPreferences.getBoolean("clockSound", false)
+        if (clockSoundEnabled && clockSoundPlayer != null) {
+            try {
+                clockSoundPlayer?.seekTo(0)
+                clockSoundPlayer?.start()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun loadShortBreakFragment() {

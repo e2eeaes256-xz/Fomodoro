@@ -57,6 +57,7 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var alarmSlider: Slider
     private lateinit var autoStartSessions: MaterialSwitch
     private lateinit var darkModeToggle: MaterialSwitch
+    private lateinit var clockSoundToggle: MaterialSwitch
     private lateinit var amoledToggle: MaterialSwitch
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var githubCard: androidx.cardview.widget.CardView
@@ -270,6 +271,7 @@ class SettingsActivity : AppCompatActivity() {
         sessionsSlider = findViewById(R.id.slider_sessions)
         autoStartSessions = findViewById(R.id.auto_start_toggle)
         darkModeToggle = findViewById(R.id.dark_mode_toggle)
+        clockSoundToggle = findViewById(R.id.clock_sound_toggle)
         amoledToggle = findViewById(R.id.amoled_toggle)
         githubCard = findViewById(R.id.github_card)
         supportCard = findViewById(R.id.support_card)
@@ -306,6 +308,7 @@ class SettingsActivity : AppCompatActivity() {
         keepScreenAwakeToggle.isChecked = keepScreenAwake
         updateWakeLock(keepScreenAwake)
         hapticFeedbackToggle.isChecked = sharedPreferences.getBoolean("hapticFeedback", true)
+        clockSoundToggle.isChecked = sharedPreferences.getBoolean("clockSound", false)
         updateTexts()
     }
 
@@ -510,6 +513,10 @@ class SettingsActivity : AppCompatActivity() {
 
         hapticFeedbackToggle.setOnCheckedChangeListener { _, isChecked ->
             sharedPreferences.edit().putBoolean("hapticFeedback", isChecked).apply()
+        }
+
+        clockSoundToggle.setOnCheckedChangeListener { _, isChecked ->
+            sharedPreferences.edit().putBoolean("clockSound", isChecked).apply()
         }
     }
 
