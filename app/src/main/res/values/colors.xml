@@ -32,10 +32,10 @@
     <!-- ⭐ New colors suggested for the Pomodoro application --> 
 
     
-    <!-- ألوان للجلسات المختلفة -->
-    <color name="focus_primary">#FF5252</color>    <!-- لون لجلسات التركيز -->
-    <color name="break_primary">#4CAF50</color>    <!-- لون لجلسات الراحة -->
-    <color name="long_break_primary">#2196F3</color> <!-- لون لجلسات الراحة الطويلة -->
+    <!-- Colors for different sessions -->
+    <color name="focus_primary">#FF5252</color>    <!-- Color for focus sessions -->
+    <color name="break_primary">#4CAF50</color>    <!-- Color for comfort sessions -->
+    <color name="long_break_primary">#2196F3</color> <!-- Color for long comfort sessions -->
     
     <!-- ألوان للوضع الليلي -->
     <color name="night_purple">#BB86FC</color>
