@@ -29,7 +29,8 @@
 </resources> 
 
 
-    <!-- ⭐ ألوان جديدة مقترحة لتطبيق البومودورو -->
+    <!-- ⭐ New colors suggested for the Pomodoro application --> 
+
     
     <!-- ألوان للجلسات المختلفة -->
     <color name="focus_primary">#FF5252</color>    <!-- لون لجلسات التركيز -->
